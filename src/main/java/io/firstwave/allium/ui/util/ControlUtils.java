@@ -1,0 +1,29 @@
+package io.firstwave.allium.ui.util;
+
+import com.sun.javafx.scene.control.skin.TableHeaderRow;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.TableView;
+
+/**
+ * Created by obartley on 11/27/15.
+ */
+public class ControlUtils
+{
+    public static void disableColumnReordering(final TableView<?> tableView) {
+        tableView.widthProperty().addListener(new ChangeListener<Number>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Number> source, Number oldWidth, Number newWidth)
+            {
+                final TableHeaderRow header = (TableHeaderRow) tableView.lookup("TableHeaderRow");
+                header.reorderingProperty().addListener(new ChangeListener<Boolean>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                        header.setReordering(false);
+                    }
+                });
+            }
+        });
+    }
+}
