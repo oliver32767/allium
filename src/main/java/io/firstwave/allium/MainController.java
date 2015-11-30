@@ -89,8 +89,6 @@ public class MainController implements Initializable {
     @FXML
     private Button sceneConfiguration;
 
-    private final Map<Layer, Canvas> mLayerCanvasMap = new LinkedHashMap<Layer, Canvas>();
-
     private final SimpleBooleanProperty mIsRendering = new SimpleBooleanProperty(false);
 
     private ConfigurationController mConfigurationController;
@@ -298,8 +296,6 @@ public class MainController implements Initializable {
             node.visibleProperty().unbind();
         }
 
-        mLayerCanvasMap.clear();
-
         Scene scene = null;
 
         if (mSceneType != null) {
@@ -357,10 +353,8 @@ public class MainController implements Initializable {
         final Task<Void> renderTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                mIsRendering.setValue(true);
-                for (Layer l : layers) {
+                for (Layer layer : layers) {
                     final Canvas canvas;
-                    final Layer layer = l;
                     try {
                         setStatus("rendering:" + layer.getName());
                         canvas = renderer.render(layer);
@@ -368,7 +362,6 @@ public class MainController implements Initializable {
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
-                                mLayerCanvasMap.put(layer, canvas);
                                 layerStack.getChildren().add(canvas);
                             }
                         });
@@ -382,6 +375,7 @@ public class MainController implements Initializable {
                 return null;
             }
         };
+        mIsRendering.setValue(true);
         Thread th = new Thread(renderTask);
         th.setDaemon(true);
         th.start();
