@@ -6,4 +6,5 @@ package io.firstwave.allium;
 public interface Const {
     String APP_NAME = "Allium";
     String VERSION = "1.0";
+    String COPYRIGHT = "Copyright © 2015 Oliver Bartley";
 }

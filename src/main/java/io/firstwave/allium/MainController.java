@@ -33,6 +33,8 @@ import java.util.*;
 
 public class MainController implements Initializable {
 
+    private static final double SCALE_DELTA = 1.1;
+
     @FXML
     private TableView<Layer> layerList;
 
@@ -57,6 +59,8 @@ public class MainController implements Initializable {
     @FXML
     private MenuItem menuZoomOut;
 
+    @FXML MenuItem menuNoZoom;
+
     @FXML
     private MenuItem menuRender;
 
@@ -65,6 +69,9 @@ public class MainController implements Initializable {
 
     @FXML
     private MenuItem menuQuit;
+
+    @FXML
+    private MenuItem menuAbout;
 
     @FXML
     private Label statusLabel;
@@ -127,6 +134,20 @@ public class MainController implements Initializable {
             }
         });
 
+        final EventHandler<ActionEvent> zoom = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                final MenuItem mnu = (MenuItem) event.getSource();
+                zoom((Integer) mnu.getUserData());
+            }
+        };
+        menuZoomIn.setUserData(1);
+        menuZoomIn.setOnAction(zoom);
+        menuZoomOut.setUserData(-1);
+        menuZoomOut.setOnAction(zoom);
+        menuNoZoom.setUserData(0);
+        menuNoZoom.setOnAction(zoom);
+
         menuQuit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -145,6 +166,18 @@ public class MainController implements Initializable {
             }
         });
         menuRender.disableProperty().bind(mIsRendering);
+
+        menuAbout.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("About");
+                alert.setHeaderText(Const.APP_NAME + " (" + Const.VERSION + ")");
+                alert.setContentText(Const.COPYRIGHT);
+
+                alert.showAndWait();
+            }
+        });
 
         mConfigurationController = new ConfigurationController(configurationList);
         applyConfiguration.setOnAction(new EventHandler<ActionEvent>() {
@@ -194,6 +227,21 @@ public class MainController implements Initializable {
         layerList.setItems(scene.getLayerList());
 
         render();
+    }
+
+    private void zoom(int amount) {
+        double scale = layerStack.getScaleX();
+
+        if (amount == 0) {
+            scale = 1.0f;
+        } else if (amount > 0) {
+            scale = scale * SCALE_DELTA;
+        } else {
+            scale = scale * (1 / SCALE_DELTA);
+        }
+
+        layerStack.setScaleX(scale);
+        layerStack.setScaleY(scale);
     }
 
     private void render() {
