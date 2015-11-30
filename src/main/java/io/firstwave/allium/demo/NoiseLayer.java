@@ -21,11 +21,10 @@ public class NoiseLayer extends Layer {
     }
 
     @Override
-    public Canvas render() {
+    protected void onRender(Canvas canvas) {
         SimplexNoiseGenerator gen = new SimplexNoiseGenerator(new Random());
 
-        Canvas rv = new Canvas(1024, 1024);
-        final GraphicsContext gc = rv.getGraphicsContext2D();
+        final GraphicsContext gc = canvas.getGraphicsContext2D();
         final PixelWriter pw = gc.getPixelWriter();
 
 
@@ -45,6 +44,5 @@ public class NoiseLayer extends Layer {
                 pw.setArgb(x, y, new Color(r,g,b,a).getRGB());
             }
         }
-        return rv;
     }
 }

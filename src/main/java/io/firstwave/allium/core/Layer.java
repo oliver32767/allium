@@ -12,9 +12,11 @@ public abstract class Layer implements Configurable {
 
     public static final String PROPERTY_NAME = "name";
     public static final String PROPERTY_VISIBLE = "visible";
+    public static final String PROPERTY_RENDERING = "rendering";
 
     private SimpleStringProperty mName = new SimpleStringProperty(toString());
     private SimpleBooleanProperty mVisible = new SimpleBooleanProperty(true);
+    private SimpleBooleanProperty mRendering = new SimpleBooleanProperty(false);
 
     private final Configuration mConfiguration;
     private final Scene mScene;
@@ -67,5 +69,15 @@ public abstract class Layer implements Configurable {
         return mVisible;
     }
 
-    public abstract Canvas render();
+    public ObservableValue<Boolean> renderingProperty() {
+        return mRendering;
+    }
+
+    public final void render(Canvas canvas) {
+        mRendering.setValue(true);
+        onRender(canvas);
+        mRendering.setValue(false);
+    }
+
+    protected abstract void onRender(Canvas canvas);
 }

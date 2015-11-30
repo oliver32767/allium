@@ -2,6 +2,7 @@ package io.firstwave.allium.demo;
 
 import io.firstwave.allium.core.Configuration;
 import io.firstwave.allium.core.Scene;
+import javafx.scene.paint.Color;
 
 /**
  * Created by obartley on 11/27/15.
@@ -13,7 +14,6 @@ public class DemoScene extends Scene {
         setConfiguration(new Configuration.Builder()
                 .addOptionItem("opt", true)
                 .build());
-
         addLayer(new NoiseLayer(this, new Configuration.Builder()
                 .addIntegerItem("r", 255)
                 .addIntegerItem("g", 0)
@@ -31,6 +31,7 @@ public class DemoScene extends Scene {
                 .addIntegerItem("g", 0)
                 .addIntegerItem("b", 255)
                 .build()
-        )).setName("Blue");
+        )).setName("Blue").setVisibile(false);
+        setBackgroundColor(Color.BLACK);
     }
 }

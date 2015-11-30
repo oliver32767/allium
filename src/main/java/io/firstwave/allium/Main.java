@@ -21,7 +21,6 @@ public class Main extends Application {
         final Parent root = loader.load();
         final MainController controller = loader.getController();
         controller.setStage(primaryStage);
-        primaryStage.setTitle("Allium (1.0)");
         primaryStage.setScene(new Scene(root, 300, 275));
         primaryStage.show();
     }

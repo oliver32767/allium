@@ -2,23 +2,27 @@ package io.firstwave.allium.core;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by obartley on 11/29/15.
  */
 public abstract class Scene implements Configurable {
-    private final List<Layer> mLayers = new ArrayList<Layer>();
-    private final ObservableList<Layer> mObservableLayers = FXCollections.observableArrayList(mLayers);
+    private final ObservableList<Layer> mLayers = FXCollections.observableArrayList(new ArrayList<Layer>());
 
     private Configuration mConfiguration = Configuration.EMPTY;
+
+    private double mWidth = 1024;
+    private double mHeight = 1024;
+    private Color mBackgroundColor = Color.TRANSPARENT;
 
     public Scene() {}
 
     public final ObservableList<Layer> getLayerList() {
-        return mObservableLayers;
+        return mLayers;
     }
 
     protected final void setConfiguration(Configuration configuration) {
@@ -26,8 +30,8 @@ public abstract class Scene implements Configurable {
     }
 
     protected final LayerEditor addLayer(Layer layer) {
-        mObservableLayers.remove(layer);
-        mObservableLayers.add(layer);
+        mLayers.remove(layer);
+        mLayers.add(layer);
         return new LayerEditor(layer);
     }
 
@@ -36,11 +40,55 @@ public abstract class Scene implements Configurable {
         return mConfiguration;
     }
 
+    public double getWidth() {
+        return mWidth;
+    }
+
+    public void setWidth(double width) {
+        mWidth = width;
+    }
+
+    public double getHeight() {
+        return mHeight;
+    }
+
+    public void setHeight(double height) {
+        mHeight = height;
+    }
+
+    public Color getBackgroundColor() {
+        return mBackgroundColor;
+    }
+
+    public void setBackgroundColor(Color backgroundColor) {
+        mBackgroundColor = backgroundColor;
+    }
+
     public final void load() {
         onLoad();
     }
 
     protected abstract void onLoad();
+
+
+    public final Renderer createRenderer() {
+        final Renderer rv = onCreateRenderer();
+
+        return rv != null ? rv : new Renderer() {
+            final double w = getWidth();
+            final double h = getHeight();
+            @Override
+            public Canvas render(Layer layer) {
+                final Canvas canvas = new Canvas(w, h);
+                layer.render(canvas);
+                return canvas;
+            }
+        };
+    }
+
+    protected Renderer onCreateRenderer() {
+        return null;
+    }
 
     public static class LayerEditor {
         private final Layer mLayer;
