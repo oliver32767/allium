@@ -312,7 +312,6 @@ public class MainController implements Initializable {
             layerList.setItems(null);
         } else {
             scene.load();
-            layerList.setItems(scene.getLayerList());
         }
         mScene = scene;
 
@@ -346,6 +345,7 @@ public class MainController implements Initializable {
         setBackgroundColor(mScene.getBackgroundColor());
 
         final Renderer renderer = mScene.createRenderer();
+        layerList.setItems(mScene.getLayerList());
         final List<Layer> layers = new ArrayList<Layer>(mScene.getLayerList());
         final long startTime = System.currentTimeMillis();
 
