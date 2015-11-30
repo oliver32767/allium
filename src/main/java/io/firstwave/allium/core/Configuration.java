@@ -1,5 +1,9 @@
 package io.firstwave.allium.core;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
+import org.pmw.tinylog.Logger;
+
 import java.util.*;
 
 /**
@@ -20,6 +24,8 @@ public final class Configuration {
     private final Map<String, Object> mValues;
 
     private final Set<OnConfigurationChangedListener> mConfigurationChangedListeners = new HashSet<OnConfigurationChangedListener>();
+
+    private final SimpleBooleanProperty mUnchanged = new SimpleBooleanProperty(true);
 
     private Editor mEditor;
 
@@ -121,15 +127,22 @@ public final class Configuration {
         return (String) mValues.get(key);
     }
 
-    private void commit(Map<String, Object> changes) {
-        if (mEditor == null) {
-            throw new IllegalStateException("Invalid editor!");
-        }
-        mEditor = null;
+    private void apply(Editor editor) {
+        cancel(editor);
+        final Map<String, Object> changes = new HashMap<String, Object>(editor.mChanges);
         for (String key : changes.keySet()) {
+            Logger.debug("applying " + key + "->" + changes.get(key));
             mValues.put(key, changes.get(key));
         }
         dispatchConfigurationChanged();
+    }
+
+    private void cancel(Editor editor) {
+        if (mEditor == null || mEditor != editor) {
+            throw new IllegalStateException("Invalid editor!");
+        }
+        mEditor = null;
+        mUnchanged.setValue(true);
     }
 
     public Editor edit() {
@@ -139,14 +152,35 @@ public final class Configuration {
         return mEditor;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(Configuration.class.getSimpleName() + "[");
+        String prefix = "";
+        for (String key : keySet()) {
+            sb.append(prefix);
+            prefix = ", ";
+            sb.append(key);
+            sb.append(":");
+            sb.append(mValues.get(key));
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public boolean isEditing() {
+        return mEditor != null;
+    }
+
+    public ObservableBooleanValue unchangedProperty() {
+        return mUnchanged;
+    }
+
+
     public final class Editor {
         private final Map<String, Object> mChanges = new HashMap<String, Object>();
 
-        private Editor() {}
 
-        public boolean isChanged() {
-            return !mChanges.isEmpty();
-        }
+        private Editor() {}
 
         public Editor setOption(String key, boolean value) {
             putValue(key, value);
@@ -183,6 +217,8 @@ public final class Configuration {
             } else {
                 mChanges.put(key, value);
             }
+            mUnchanged.setValue(mChanges.isEmpty());
+            Logger.trace(this);
         }
 
         private boolean compare(String key, Object value) {
@@ -199,8 +235,29 @@ public final class Configuration {
             }
         }
 
-        public void commit() {
-            Configuration.this.commit(mChanges);
+        public void cancel() {
+            Configuration.this.cancel(this);
+        }
+
+        public void apply() {
+            Configuration.this.apply(this);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder(Configuration.class.getSimpleName() + "[");
+            String prefix = "";
+            for (String key : mChanges.keySet()) {
+                sb.append(prefix);
+                prefix = ", ";
+                sb.append(key);
+                sb.append(":");
+                sb.append(mValues.get(key));
+                sb.append("->");
+                sb.append(mChanges.get(key));
+            }
+            sb.append("]");
+            return sb.toString();
         }
     }
 
@@ -228,7 +285,7 @@ public final class Configuration {
         }
 
         public Builder addIntegerItem(String key, int defaultValue) {
-            return addIntegerItem(key, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            return addIntegerItem(key, defaultValue, 0, 255);
         }
 
         public Builder addIntegerItem(String key, int defaultValue, int min, int max) {
@@ -243,7 +300,7 @@ public final class Configuration {
         }
 
         public Builder addFloatItem(String key, float defaultValue) {
-            return addFloatItem(key, defaultValue, -Float.MAX_VALUE, Float.MAX_VALUE);
+            return addFloatItem(key, defaultValue, -1.0f, 1.0f);
         }
 
         public Builder addFloatItem(String key, float defaultValue, float min, float max) {
@@ -265,10 +322,6 @@ public final class Configuration {
             mValues.put(key, defaultValue);
 
             return this;
-        }
-
-        public boolean containsItem(String key) {
-            return mItems.containsKey(key);
         }
 
         public Configuration build() {

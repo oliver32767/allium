@@ -4,6 +4,7 @@ import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.Pane;
 
 /**
  * Created by obartley on 11/27/15.
@@ -25,5 +26,12 @@ public class ControlUtils
                 });
             }
         });
+    }
+
+    public static void hideColumnHeaders(final TableView<?> table) {
+        Pane header = (Pane) table.lookup("TableHeaderRow");
+        header.setVisible(false);
+        table.setLayoutY(-header.getHeight());
+        table.autosize();
     }
 }

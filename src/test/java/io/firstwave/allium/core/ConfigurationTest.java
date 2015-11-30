@@ -98,7 +98,7 @@ public class ConfigurationTest {
         assertEquals(1, mConfig.getInteger("int"));
         assertEquals(1f, mConfig.getFloat("float"), 0.001f);
 
-        ed.commit();
+        ed.apply();
 
         assertFalse(mConfig.getOption("opt"));
         assertEquals(0, mConfig.getOptionSetIndex("opt_set"));

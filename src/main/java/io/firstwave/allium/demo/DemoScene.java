@@ -12,9 +12,13 @@ public class DemoScene extends Scene {
     @Override
     protected void onLoad() {
         setConfiguration(new Configuration.Builder()
-                .addOptionItem("opt", true)
                 .build());
         addLayer(new NoiseLayer(this, new Configuration.Builder()
+                .addOptionItem("opt", true)
+                .addOptionSetItem("opt_set", 1, "foo", "bar")
+                .addFloatItem("float", 0)
+                .addStringItem("str", "string")
+
                 .addIntegerItem("r", 255)
                 .addIntegerItem("g", 0)
                 .addIntegerItem("b", 0)
@@ -32,6 +36,7 @@ public class DemoScene extends Scene {
                 .addIntegerItem("b", 255)
                 .build()
         )).setName("Blue").setVisibile(false);
+
         setBackgroundColor(Color.BLACK);
     }
 }
