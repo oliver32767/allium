@@ -26,6 +26,9 @@
                            </children>
                         </Group>
                      </content>
+                     <cursor>
+                        <Cursor fx:constant="CROSSHAIR" />
+                     </cursor>
                   </ScrollPane>
                </children>
             </AnchorPane>
@@ -33,12 +36,29 @@
                <children>
                   <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <items>
-                        <TableView fx:id="layerList" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <columns>
-                            <TableColumn fx:id="layerVisibility" maxWidth="32.0" minWidth="32.0" prefWidth="32.0" resizable="false" />
-                            <TableColumn fx:id="layerName" editable="false" prefWidth="75.0" sortable="false" text="Layers" />
-                          </columns>
-                        </TableView>
+                        <VBox>
+                           <children>
+                              <AnchorPane VBox.vgrow="NEVER">
+                                 <children>
+                                    <HBox fillHeight="false" maxWidth="1.7976931348623157E308" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <ChoiceBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefWidth="150.0" HBox.hgrow="ALWAYS" />
+                                          <Button fx:id="sceneConfiguration" mnemonicParsing="false">
+                                             <tooltip>
+                                                <Tooltip text="Show Scene Settings" />
+                                             </tooltip></Button>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </AnchorPane>
+                              <TableView fx:id="layerList" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
+                                <columns>
+                                  <TableColumn fx:id="layerVisibility" maxWidth="32.0" minWidth="32.0" prefWidth="32.0" resizable="false" />
+                                  <TableColumn fx:id="layerName" editable="false" prefWidth="75.0" sortable="false" text="Layers" />
+                                </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
                         <AnchorPane>
                            <children>
                               <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -48,16 +68,24 @@
                                           <VBox fx:id="configurationList" maxHeight="1.7976931348623157E308" prefHeight="200.0" prefWidth="100.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <padding>
                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                             </padding></VBox>
+                                             </padding>
+                                          </VBox>
                                        </content>
                                     </ScrollPane>
                                     <AnchorPane>
                                        <children>
                                           <HBox layoutX="139.0" spacing="10.0" AnchorPane.rightAnchor="0.0">
                                              <children>
-                                                <Button fx:id="sceneConfiguration" mnemonicParsing="false" text="Scene" />
-                                                <Button fx:id="cancelConfiguration" mnemonicParsing="false" text="Reset" />
-                                                <Button fx:id="applyConfiguration" alignment="CENTER" mnemonicParsing="false" text="Apply" AnchorPane.rightAnchor="0.0" />
+                                                <Button fx:id="cancelConfiguration" mnemonicParsing="false" text="Reset">
+                                                   <tooltip>
+                                                      <Tooltip text="Reset Settings" />
+                                                   </tooltip>
+                                                </Button>
+                                                <Button fx:id="applyConfiguration" alignment="CENTER" mnemonicParsing="false" text="Apply" AnchorPane.rightAnchor="0.0">
+                                                   <tooltip>
+                                                      <Tooltip text="Apply Settings &amp; Render" />
+                                                   </tooltip>
+                                                </Button>
                                              </children>
                                           </HBox>
                                        </children>

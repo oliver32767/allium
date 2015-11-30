@@ -21,6 +21,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -30,7 +32,9 @@ import org.pmw.tinylog.Logger;
 
 import java.io.File;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
 
@@ -206,6 +210,8 @@ public class MainController implements Initializable {
                 mConfigurationController.cancel();
             }
         });
+        Image settings = new Image(getClass().getResourceAsStream("/images/settings.png"));
+        sceneConfiguration.setGraphic(new ImageView(settings));
         sceneConfiguration.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -336,6 +342,10 @@ public class MainController implements Initializable {
     }
 
     private void render() {
+        if (mIsRendering.getValue()) {
+            Logger.debug("Render in progress -- skipping");
+            return;
+        }
         layerStack.getChildren().clear();
 
         if (mScene == null) {
@@ -420,7 +430,6 @@ public class MainController implements Initializable {
         }
 
         configurationList.getChildren().clear();
-        sceneConfiguration.setDisable(false);
 
         if (mScene == null) {
             return;
@@ -432,7 +441,6 @@ public class MainController implements Initializable {
                 Logger.debug("Configuring scene:" + mScene);
                 mConfigurationController.configurationProperty().setValue(mScene.getConfiguration());
                 mScene.getConfiguration().addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-                sceneConfiguration.setDisable(true);
             } else {
                 Logger.debug("Clearing configuration");
                 mConfigurationController.configurationProperty().setValue(null);
