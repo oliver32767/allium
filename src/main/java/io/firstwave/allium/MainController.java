@@ -4,7 +4,6 @@ import io.firstwave.allium.core.Configuration;
 import io.firstwave.allium.core.Layer;
 import io.firstwave.allium.core.Renderer;
 import io.firstwave.allium.core.Scene;
-import io.firstwave.allium.demo.DemoScene;
 import io.firstwave.allium.ui.util.ConfigurationController;
 import io.firstwave.allium.ui.util.ControlUtils;
 import javafx.application.Platform;
@@ -25,9 +24,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
 
+import java.io.File;
 import java.net.URL;
 import java.util.*;
 
@@ -52,6 +53,9 @@ public class MainController implements Initializable {
 
     @FXML
     private ScrollPane scrollPane;
+
+    @FXML
+    private MenuItem menuOpen;
 
     @FXML
     private MenuItem menuZoomIn;
@@ -132,12 +136,20 @@ public class MainController implements Initializable {
 
         configurationList.disableProperty().bind(mIsRendering);
 
+        menuOpen.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                open();
+            }
+        });
+
         menuReload.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 reload();
             }
         });
+        menuReload.setDisable(true);
 
         final EventHandler<ActionEvent> zoom = new EventHandler<ActionEvent>() {
             @Override
@@ -170,7 +182,6 @@ public class MainController implements Initializable {
                 }
             }
         });
-        menuRender.disableProperty().bind(mIsRendering);
 
         menuAbout.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -212,7 +223,7 @@ public class MainController implements Initializable {
             }
         });
 
-        setSceneType(DemoScene.class);
+        openFile(Prefs.getLastPath());
     }
 
     private void updateTitle() {
@@ -226,7 +237,58 @@ public class MainController implements Initializable {
         }
     }
 
+    private void open() {
+        if (getStage() != null) {
+            FileChooser fileChooser = new FileChooser();
+            File initial = Prefs.getLastPath();
+            if (initial == null) {
+                fileChooser.setInitialDirectory(
+                        new File(System.getProperty("user.home"))
+                );
+            } else if (initial.isDirectory()) {
+                fileChooser.setInitialDirectory(initial);
+            } else {
+                fileChooser.setInitialDirectory(new File(initial.getParent()));
+            }
+            fileChooser.setTitle("Open Allium jar");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Allium Jar (*.jar)", "*.jar"));
+
+            File file = fileChooser.showOpenDialog(getStage());
+            if (file != null) {
+                openFile(file);
+            }
+        }
+    }
+
+    private void openFile(File file) {
+        setStatus("Opening jar " + file);
+        Prefs.setLastPath(file);
+        List<Class<? extends Scene>> scenes = FileOpener.getScenes(file);
+        if (scenes.isEmpty()) {
+            setSceneType(null);
+            return;
+        }
+        setSceneType(scenes.get(0));
+    }
+
+
     private void setSceneType(Class<? extends Scene> sceneType) {
+        menuReload.setDisable(sceneType == null);
+        if (sceneType == null) {
+            menuRender.disableProperty().unbind();
+            menuRender.setDisable(true);
+            menuZoomIn.disableProperty().unbind();
+            menuZoomIn.setDisable(true);
+            menuZoomOut.disableProperty().unbind();
+            menuZoomOut.setDisable(true);
+            menuNoZoom.disableProperty().unbind();
+            menuNoZoom.setDisable(true);
+        } else {
+            menuRender.disableProperty().bind(mIsRendering);
+            menuZoomIn.disableProperty().bind(mIsRendering);
+            menuZoomOut.disableProperty().bind(mIsRendering);
+            menuNoZoom.disableProperty().bind(mIsRendering);
+        }
         mSceneType = sceneType;
         reload();
     }
@@ -365,6 +427,11 @@ public class MainController implements Initializable {
 
         configurationList.getChildren().clear();
         sceneConfiguration.setDisable(false);
+
+        if (mScene == null) {
+            return;
+        }
+
         mScene.getConfiguration().removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         if (index < 0 || index >= mScene.getLayerList().size()) {
             if (mScene != null) {

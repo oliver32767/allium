@@ -78,11 +78,11 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem disable="true" mnemonicParsing="false" text="Open">
+              <MenuItem fx:id="menuOpen" mnemonicParsing="false" text="Open">
                      <accelerator>
                         <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                      </accelerator></MenuItem>
-                  <MenuItem fx:id="menuReload" mnemonicParsing="false" text="Reload">
+                  <MenuItem fx:id="menuReload" disable="true" mnemonicParsing="false" text="Reload">
                      <accelerator>
                         <KeyCodeCombination alt="UP" code="R" control="UP" meta="UP" shift="DOWN" shortcut="DOWN" />
                      </accelerator>
@@ -97,7 +97,7 @@
           </Menu>
           <Menu mnemonicParsing="false" text="View">
             <items>
-              <MenuItem fx:id="menuRender" mnemonicParsing="false" text="Render">
+              <MenuItem fx:id="menuRender" disable="true" mnemonicParsing="false" text="Render">
                      <accelerator>
                         <KeyCodeCombination alt="UP" code="R" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                      </accelerator></MenuItem>
