@@ -9,16 +9,18 @@ import javafx.scene.paint.Color;
  */
 public class DemoScene extends Scene {
 
+
+
     @Override
     protected void onLoad() {
         setConfiguration(new Configuration.Builder()
+                .addOptionItem("Option", true)
+                .addOptionSetItem("Option Set", 1, "foo", "bar")
+                .addIntegerItem("Integer", 0)
+                .addFloatItem("Float", 0)
+                .addStringItem("String", null)
                 .build());
         addLayer(new NoiseLayer(this, new Configuration.Builder()
-                .addOptionItem("opt", true)
-                .addOptionSetItem("opt_set", 1, "foo", "bar")
-                .addFloatItem("float", 0)
-                .addStringItem("str", "string")
-
                 .addIntegerItem("r", 255)
                 .addIntegerItem("g", 0)
                 .addIntegerItem("b", 0)

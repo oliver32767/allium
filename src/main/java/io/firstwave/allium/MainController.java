@@ -82,6 +82,9 @@ public class MainController implements Initializable {
     @FXML
     private Button cancelConfiguration;
 
+    @FXML
+    private Button sceneConfiguration;
+
     private final Map<Layer, Canvas> mLayerCanvasMap = new LinkedHashMap<Layer, Canvas>();
 
     private final SimpleBooleanProperty mIsRendering = new SimpleBooleanProperty(false);
@@ -192,6 +195,13 @@ public class MainController implements Initializable {
                 mConfigurationController.cancel();
             }
         });
+        sceneConfiguration.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                layerList.getSelectionModel().clearSelection();
+            }
+        });
+
         mConfigurationController.configurationProperty().addListener(new ChangeListener<Configuration>() {
             @Override
             public void changed(ObservableValue<? extends Configuration> observable, Configuration oldValue, Configuration newValue) {
@@ -214,7 +224,7 @@ public class MainController implements Initializable {
         }
     }
 
-    private void setScene(Scene scene) {
+    private void setScene(final Scene scene) {
         scene.load();
         updateTitle();
 
@@ -226,6 +236,7 @@ public class MainController implements Initializable {
         mScene = scene;
         layerList.setItems(scene.getLayerList());
 
+        updateConfigurationList(-1);
         render();
     }
 
@@ -318,8 +329,16 @@ public class MainController implements Initializable {
     }
 
     private void updateConfigurationList(int index) {
+
         configurationList.getChildren().clear();
         if (index < 0 || index >= mScene.getLayerList().size()) {
+            if (mScene != null) {
+                Logger.debug("Configuring scene:" + mScene);
+                mConfigurationController.configurationProperty().setValue(mScene.getConfiguration());
+            } else {
+                Logger.debug("Clearing configuration");
+                mConfigurationController.configurationProperty().setValue(null);
+            }
             return;
         }
 

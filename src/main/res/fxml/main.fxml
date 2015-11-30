@@ -55,6 +55,7 @@
                                        <children>
                                           <HBox layoutX="139.0" spacing="10.0" AnchorPane.rightAnchor="0.0">
                                              <children>
+                                                <Button fx:id="sceneConfiguration" mnemonicParsing="false" text="Scene" />
                                                 <Button fx:id="cancelConfiguration" mnemonicParsing="false" text="Reset" />
                                                 <Button fx:id="applyConfiguration" alignment="CENTER" mnemonicParsing="false" text="Apply" AnchorPane.rightAnchor="0.0" />
                                              </children>
