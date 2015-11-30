@@ -45,12 +45,14 @@ public class ConfigurationController {
         onConfigurationChanged(mConfiguration.getValue(), mConfiguration.getValue());
     }
 
-    public void apply() {
+    public int apply() {
+        int rv = 0;
         if (mConfiguration.getValue() != null ) {
             if (mConfiguration.getValue().isEditing()) {
-                mConfiguration.getValue().edit().apply();
+                rv = mConfiguration.getValue().edit().apply();
             }
         }
+        return rv;
     }
 
     private void onConfigurationChanged(Configuration oldValue, Configuration newValue) {
@@ -176,7 +178,7 @@ public class ConfigurationController {
                 lbl.setText(String.valueOf(key + ":" + (float) sl.getValue()));
             }
         });
-
+        sl.setBlockIncrement(0.1);
         rv.getChildren().add(sl);
 
         return rv;

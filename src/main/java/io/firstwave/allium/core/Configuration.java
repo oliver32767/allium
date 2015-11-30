@@ -239,8 +239,9 @@ public final class Configuration {
             Configuration.this.cancel(this);
         }
 
-        public void apply() {
+        public int apply() {
             Configuration.this.apply(this);
+            return mChanges.size();
         }
 
         @Override

@@ -92,6 +92,8 @@ public class MainController implements Initializable {
     private ConfigurationController mConfigurationController;
     private Stage mStage;
     private Scene mScene;
+    private Class<? extends Scene> mSceneType;
+
     private Configuration.OnConfigurationChangedListener mOnConfigurationChangedListener;
 
     public void setStage(Stage stage) {
@@ -133,7 +135,7 @@ public class MainController implements Initializable {
         menuReload.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                setScene(new DemoScene());
+                reload();
             }
         });
 
@@ -186,7 +188,7 @@ public class MainController implements Initializable {
         applyConfiguration.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                mConfigurationController.apply();
+                setStatus("Applied " + mConfigurationController.apply() + " change(s)");
             }
         });
         cancelConfiguration.setOnAction(new EventHandler<ActionEvent>() {
@@ -210,7 +212,7 @@ public class MainController implements Initializable {
             }
         });
 
-        setScene(new DemoScene());
+        setSceneType(DemoScene.class);
     }
 
     private void updateTitle() {
@@ -224,18 +226,39 @@ public class MainController implements Initializable {
         }
     }
 
-    private void setScene(final Scene scene) {
-        scene.load();
-        updateTitle();
+    private void setSceneType(Class<? extends Scene> sceneType) {
+        mSceneType = sceneType;
+        reload();
+    }
 
+    private void reload() {
         for (Node node : layerStack.getChildren()) {
             node.visibleProperty().unbind();
         }
 
         mLayerCanvasMap.clear();
-        mScene = scene;
-        layerList.setItems(scene.getLayerList());
 
+        Scene scene = null;
+
+        if (mSceneType != null) {
+            try {
+                scene = mSceneType.newInstance();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (scene == null) {
+            layerList.setItems(null);
+        } else {
+            scene.load();
+            layerList.setItems(scene.getLayerList());
+        }
+        mScene = scene;
+
+        updateTitle();
         updateConfigurationList(-1);
         render();
     }
@@ -316,6 +339,7 @@ public class MainController implements Initializable {
     }
 
     private void setStatus(final String status) {
+        Logger.info(status);
         if (Platform.isFxApplicationThread()) {
             statusLabel.textProperty().setValue(status);
             return;
@@ -330,11 +354,24 @@ public class MainController implements Initializable {
 
     private void updateConfigurationList(int index) {
 
+        if (mOnConfigurationChangedListener == null) {
+            mOnConfigurationChangedListener = new Configuration.OnConfigurationChangedListener() {
+                @Override
+                public void onConfigurationChanged(Configuration config) {
+                    render();
+                }
+            };
+        }
+
         configurationList.getChildren().clear();
+        sceneConfiguration.setDisable(false);
+        mScene.getConfiguration().removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         if (index < 0 || index >= mScene.getLayerList().size()) {
             if (mScene != null) {
                 Logger.debug("Configuring scene:" + mScene);
                 mConfigurationController.configurationProperty().setValue(mScene.getConfiguration());
+                mScene.getConfiguration().addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+                sceneConfiguration.setDisable(true);
             } else {
                 Logger.debug("Clearing configuration");
                 mConfigurationController.configurationProperty().setValue(null);
@@ -351,14 +388,7 @@ public class MainController implements Initializable {
         final Configuration config = layer.getConfiguration();
         final Configuration old = mConfigurationController.configurationProperty().getValue();
 
-        if (mOnConfigurationChangedListener == null) {
-            mOnConfigurationChangedListener = new Configuration.OnConfigurationChangedListener() {
-                @Override
-                public void onConfigurationChanged(Configuration config) {
-                    render();
-                }
-            };
-        }
+
 
         if (old != null) {
             old.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
