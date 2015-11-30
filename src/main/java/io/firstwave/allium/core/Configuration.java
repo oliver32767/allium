@@ -22,6 +22,7 @@ public final class Configuration {
 
     private final Map<String, Item> mItems;
     private final Map<String, Object> mValues;
+    private final Map<String, String> mDescriptions;
 
     private final Set<OnConfigurationChangedListener> mConfigurationChangedListeners = new HashSet<OnConfigurationChangedListener>();
 
@@ -32,11 +33,13 @@ public final class Configuration {
     private Configuration() {
         mItems = new HashMap<String, Item>();
         mValues = new HashMap<String, Object>();
+        mDescriptions = new HashMap<String, String>();
     }
 
     private Configuration(Builder b) {
         mItems = new LinkedHashMap<String, Item>(b.mItems);
         mValues = new HashMap<String, Object>(b.mValues);
+        mDescriptions = new HashMap<String, String>(b.mDescriptions);
     }
 
     public boolean addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
@@ -69,6 +72,10 @@ public final class Configuration {
             return mValues.get(key);
         }
         return null;
+    }
+
+    public String getDescription(String key) {
+        return mDescriptions.getOrDefault(key, null);
     }
     
     public boolean getOption(String key) {
@@ -265,6 +272,12 @@ public final class Configuration {
     public static final class Builder {
         private Map<String, Item> mItems = new LinkedHashMap<String, Item>();
         private Map<String, Object> mValues = new HashMap<String, Object>();
+        private Map<String, String> mDescriptions = new HashMap<String, String>();
+
+        public Builder setDescription(String key, String description) {
+            mDescriptions.put(key, description);
+            return this;
+        }
 
         public Builder addOptionItem(String key, boolean defaultValue) {
             final Item item = new Item(Type.OPTION, null);

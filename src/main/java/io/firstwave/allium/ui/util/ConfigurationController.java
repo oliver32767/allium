@@ -71,6 +71,10 @@ public class ConfigurationController {
         for (String key : newValue.keySet()) {
             final Node node = getNodeForConfiguration(key, newValue);
             if (node != null) {
+                final String desc = newValue.getDescription(key);
+                if (desc != null && !desc.trim().equals("")) {
+                    Tooltip.install(node, new Tooltip(desc));
+                }
                 mChildList.add(node);
             }
         }

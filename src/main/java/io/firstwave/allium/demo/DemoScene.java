@@ -15,7 +15,9 @@ public class DemoScene extends Scene {
     protected void onLoad() {
         setConfiguration(new Configuration.Builder()
                 .addOptionItem("Option", true)
+                .setDescription("Option", "Boolean option")
                 .addOptionSetItem("Option Set", 1, "foo", "bar")
+                .setDescription("Option Set", "Choose from a set of options")
                 .addIntegerItem("Integer", 0)
                 .addFloatItem("Float", 0)
                 .addStringItem("String", null)
