@@ -1,8 +1,6 @@
 package io.firstwave.allium.core;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by obartley on 11/27/15.
@@ -11,18 +9,17 @@ public final class Configuration {
 
     public enum Type {
         OPTION,
+        OPTION_SET,
         INTEGER, FLOAT,
-        SINGLE_CHOICE,
-        MULTI_CHOICE
+        STRING,
     }
 
     public static final Configuration EMPTY = new Configuration();
 
-    public static final int MIN = 0;
-    public static final int MAX = 1;
-
     private final Map<String, Item> mItems;
     private final Map<String, Object> mValues;
+
+    private final Set<OnConfigurationChangedListener> mConfigurationChangedListeners = new HashSet<OnConfigurationChangedListener>();
 
     private Editor mEditor;
 
@@ -32,8 +29,22 @@ public final class Configuration {
     }
 
     private Configuration(Builder b) {
-        mItems = new HashMap<String, Item>(b.mItems);
+        mItems = new LinkedHashMap<String, Item>(b.mItems);
         mValues = new HashMap<String, Object>(b.mValues);
+    }
+
+    public boolean addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
+        return mConfigurationChangedListeners.add(listener);
+    }
+
+    public boolean removeOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
+        return mConfigurationChangedListeners.remove(listener);
+    }
+
+    private void dispatchConfigurationChanged() {
+        for (OnConfigurationChangedListener l : mConfigurationChangedListeners) {
+            l.onConfigurationChanged(this);
+        }
     }
     
     public Set<String> keySet() {
@@ -46,12 +57,33 @@ public final class Configuration {
         }
         return null;
     }
+
+    public Object getValue(String key) {
+        if (mValues.containsKey(key)) {
+            return mValues.get(key);
+        }
+        return null;
+    }
     
     public boolean getOption(String key) {
         if (getType(key) != Type.OPTION) {
             throw new IllegalArgumentException(key + " is not an option type!");
         }
         return (Boolean) mValues.get(key);
+    }
+
+    public int getOptionSetIndex(String key) {
+        if (getType(key) != Type.OPTION_SET) {
+            throw new IllegalArgumentException(key + " is not an option set type!");
+        }
+        return (Integer) mValues.get(key);
+    }
+
+    public String[] getOptionSet(String key) {
+        if (getType(key) != Type.OPTION_SET) {
+            throw new IllegalArgumentException(key + " is not an option set type!");
+        }
+        return (String[]) mItems.get(key).params;
     }
     
     public int getInteger(String key) {
@@ -61,11 +93,11 @@ public final class Configuration {
         return (Integer) mValues.get(key);
     }
     
-    public int[] getIntegerRange(String key) {
+    public IntegerRange getIntegerRange(String key) {
         if (getType(key) != Type.INTEGER) {
             throw new IllegalArgumentException(key + " is not an integer type");
         }
-        return (int[]) mItems.get(key).params; 
+        return (IntegerRange) mItems.get(key).params;
     }
 
     public float getFloat(String key) {
@@ -75,11 +107,29 @@ public final class Configuration {
         return (Float) mValues.get(key);
     }
 
-    public float[] getFloatRange(String key) {
+    public FloatRange getFloatRange(String key) {
         if (getType(key) != Type.FLOAT) {
             throw new IllegalArgumentException(key + " is not a float type");
         }
-        return (float[]) mItems.get(key).params;
+        return (FloatRange) mItems.get(key).params;
+    }
+
+    public String getString(String key) {
+        if (getType(key) != Type.STRING) {
+            throw new IllegalArgumentException(key + " is not a string type!");
+        }
+        return (String) mValues.get(key);
+    }
+
+    private void commit(Map<String, Object> changes) {
+        if (mEditor == null) {
+            throw new IllegalStateException("Invalid editor!");
+        }
+        mEditor = null;
+        for (String key : changes.keySet()) {
+            mValues.put(key, changes.get(key));
+        }
+        dispatchConfigurationChanged();
     }
 
     public Editor edit() {
@@ -92,24 +142,41 @@ public final class Configuration {
     public final class Editor {
         private final Map<String, Object> mChanges = new HashMap<String, Object>();
 
-        private Editor() {
-        }
+        private Editor() {}
 
         public boolean isChanged() {
             return !mChanges.isEmpty();
         }
 
-        public void setOption(String key, boolean value) {
+        public Editor setOption(String key, boolean value) {
             putValue(key, value);
+            return this;
         }
 
-        public void setInteger(String key, int value) {
-            putValue(key, value);
+        public Editor setOptionSetIndex(String key, int index) {
+            putValue(key, index);
+            return this;
         }
 
+        public Editor setInteger(String key, int value) {
+            putValue(key, value);
+            return this;
+        }
 
+        public Editor setFloat(String key, float value) {
+            putValue(key, value);
+            return this;
+        }
+
+        public Editor setString(String key, String value) {
+            putValue(key, value);
+            return this;
+        }
 
         private void putValue(String key, Object value) {
+            if (!mItems.containsKey(key)) {
+                throw new IllegalArgumentException("Key not found:" + key);
+            }
             mItems.get(key).validate(value);
             if (compare(key, value)) {
                 mChanges.remove(key);
@@ -125,43 +192,33 @@ public final class Configuration {
                 return value == curr;
             }
 
-            if (!value.getClass().isArray()) {
+            if (value.getClass().isArray()) {
+                return Arrays.equals((Object[]) value, (Object[]) curr);
+            } else {
                 return value.equals(curr);
             }
-
-            for (Object v : (Object[]) value) {
-                for (Object c : (Object[]) curr) {
-                    if (!v.equals(c)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
         }
 
         public void commit() {
-
+            Configuration.this.commit(mChanges);
         }
     }
 
     public static final class Builder {
-        private Map<String, Item> mItems = new HashMap<String, Item>();
+        private Map<String, Item> mItems = new LinkedHashMap<String, Item>();
         private Map<String, Object> mValues = new HashMap<String, Object>();
 
-
-        public Builder addOptionItem(String key, String label, boolean defaultValue) {
-            final Item item = new Item(Type.OPTION, label, null);
+        public Builder addOptionItem(String key, boolean defaultValue) {
+            final Item item = new Item(Type.OPTION, null);
 
             mItems.put(key, item);
             mValues.put(key, defaultValue);
+
             return this;
         }
 
-        public Builder addIntegerItem(String key, String label, int defaultValue, int min, int max) {
-            final int[] params = new int[2];
-            params[MIN] = min;
-            params[MAX] = max;
-            final Item item = new Item(Type.INTEGER, label, params);
+        public Builder addOptionSetItem(String key, int defaultValue, String... options) {
+            final Item item = new Item(Type.OPTION_SET, options);
 
             item.validate(defaultValue);
             mItems.put(key, item);
@@ -170,17 +227,48 @@ public final class Configuration {
             return this;
         }
 
-        public Builder addFloatItem(String key, String label, float defaultValue, float min, float max) {
-            final float[] params = new float[2];
-            params[MIN] = min;
-            params[MAX] = max;
-            final Item item = new Item(Type.FLOAT, label, params);
+        public Builder addIntegerItem(String key, int defaultValue) {
+            return addIntegerItem(key, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        }
+
+        public Builder addIntegerItem(String key, int defaultValue, int min, int max) {
+            final IntegerRange params = new IntegerRange(min, max);
+            final Item item = new Item(Type.INTEGER, params);
 
             item.validate(defaultValue);
             mItems.put(key, item);
             mValues.put(key, defaultValue);
 
             return this;
+        }
+
+        public Builder addFloatItem(String key, float defaultValue) {
+            return addFloatItem(key, defaultValue, -Float.MAX_VALUE, Float.MAX_VALUE);
+        }
+
+        public Builder addFloatItem(String key, float defaultValue, float min, float max) {
+            final FloatRange params = new FloatRange(min, max);
+            final Item item = new Item(Type.FLOAT, params);
+
+            item.validate(defaultValue);
+            mItems.put(key, item);
+            mValues.put(key, defaultValue);
+
+            return this;
+        }
+
+        public Builder addStringItem(String key, String defaultValue) {
+            final Item item = new Item(Type.STRING, null);
+
+            item.validate(defaultValue);
+            mItems.put(key, item);
+            mValues.put(key, defaultValue);
+
+            return this;
+        }
+
+        public boolean containsItem(String key) {
+            return mItems.containsKey(key);
         }
 
         public Configuration build() {
@@ -190,12 +278,10 @@ public final class Configuration {
 
     private static class Item {
         private final Type type;
-        private final String label;
         private final Object params;
 
-        private Item(Type type, String label, Object params) {
+        private Item(Type type, Object params) {
             this.type = type;
-            this.label = label;
             this.params = params;
         }
 
@@ -206,27 +292,26 @@ public final class Configuration {
                     case OPTION:
                         final Boolean b = (Boolean) value;
                         break;
+                    case OPTION_SET:
+                        final Integer idx = (Integer) value;
+                        final String[] opts = (String[]) params;
+                        valid = (idx != null) &&
+                                (idx >= 0) &&
+                                (idx < opts.length);
+                        break;
                     case INTEGER:
                         final Integer i = (Integer) value;
-                        final Integer[] is = (Integer[]) params;
-                        valid = (is[0] <= i && i <= is[1]);
+                        final IntegerRange ir = (IntegerRange) params;
+                        valid = (ir.min <= i && i <= ir.max);
                         break;
                     case FLOAT:
                         final Float f = (Float) value;
-                        final Float[] fs = (Float[]) params;
-                        valid = (fs[0] <= f && f <= fs[1]);
+                        final FloatRange fr = (FloatRange) params;
+                        valid = (fr.min <= f && f <= fr.max);
                         break;
-                    case SINGLE_CHOICE:
-                        final Integer i2 = (Integer) value;
-                        final String[] ss = (String[]) params;
-                        valid = (0 <= i2 && i2 < ss.length);
-                        break;
-                    case MULTI_CHOICE:
-                        final Integer[] is2 = (Integer[]) value;
-                        final String[] ss2 = (String[]) params;
-                        for (Integer i4 : is2) {
-                            valid = valid && (0 <= i4 && i4 < ss2.length);
-                        }
+                    case STRING:
+                        final String s2 = (String) value;
+                        valid = true;
                         break;
                     default:
                         throw new IllegalArgumentException("Unknown item type");
@@ -239,5 +324,29 @@ public final class Configuration {
                 throw new IllegalArgumentException("Value out of bounds!");
             }
         }
+    }
+
+    public static class IntegerRange {
+        public final int min;
+        public final int max;
+
+        private IntegerRange(int min, int max) {
+            this.min = min;
+            this.max = max;
+        }
+    }
+
+    public static class FloatRange {
+        public final float min;
+        public final float max;
+
+        private FloatRange(float min, float max) {
+            this.min = min;
+            this.max = max;
+        }
+    }
+
+    public interface OnConfigurationChangedListener {
+        void onConfigurationChanged(Configuration config);
     }
 }

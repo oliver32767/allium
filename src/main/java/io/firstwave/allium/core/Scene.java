@@ -1,46 +1,61 @@
 package io.firstwave.allium.core;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by obartley on 11/27/15.
+ * Created by obartley on 11/29/15.
  */
-public abstract class Scene {
+public abstract class Scene implements Configurable {
+    private final List<Layer> mLayers = new ArrayList<Layer>();
+    private final ObservableList<Layer> mObservableLayers = FXCollections.observableArrayList(mLayers);
 
-    private Observer mObserver;
+    private Configuration mConfiguration = Configuration.EMPTY;
 
-    public abstract int getLayerCount();
-    public abstract Layer getLayerAt(int i);
+    public Scene() {}
 
-    public String getLabelForLayer(int i) {
-        return getLayerAt(i).getClass().getSimpleName();
+    public final ObservableList<Layer> getLayerList() {
+        return mObservableLayers;
     }
 
-    public boolean getDefaultVisibilityForLayer(int i) {
-        return true;
+    protected final void setConfiguration(Configuration configuration) {
+        mConfiguration =  configuration == null ? Configuration.EMPTY : configuration;
     }
 
-    protected void notifySceneChanged() {
-        if (mObserver != null) {
-            mObserver.onSceneChanged(this);
+    protected final LayerEditor addLayer(Layer layer) {
+        mObservableLayers.remove(layer);
+        mObservableLayers.add(layer);
+        return new LayerEditor(layer);
+    }
+
+    @Override
+    public final Configuration getConfiguration() {
+        return mConfiguration;
+    }
+
+    public final void load() {
+        onLoad();
+    }
+
+    protected abstract void onLoad();
+
+    public static class LayerEditor {
+        private final Layer mLayer;
+
+        public LayerEditor(Layer layer) {
+            mLayer = layer;
         }
-    }
 
-    public void setObserver(Observer observer) {
-        mObserver = observer;
-    }
-
-    public static List<Layer> collectLayers(Scene scene) {
-        final int count = scene.getLayerCount();
-        final List<Layer> layers = new ArrayList<Layer>(count);
-        for (int i = 0; i < count; i++) {
-            layers.add(scene.getLayerAt(i));
+        public LayerEditor setName(String name) {
+            mLayer.setName(name);
+            return this;
         }
-        return layers;
-    }
-
-    public interface Observer {
-        void onSceneChanged(Scene scene);
+        public LayerEditor setVisibile(boolean visibility) {
+            mLayer.setVisible(visibility);
+            return this;
+        }
     }
 }
