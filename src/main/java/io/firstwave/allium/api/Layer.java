@@ -1,43 +1,48 @@
 package io.firstwave.allium.api;
 
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.canvas.Canvas;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
- * Created by obartley on 11/27/15.
+ * Created by obartley on 12/1/15.
  */
-public abstract class Layer implements Configurable {
+public class Layer {
 
-    private SimpleStringProperty mName = new SimpleStringProperty(toString());
-    private SimpleObjectProperty<Visibility> mVisible = new SimpleObjectProperty<>(Visibility.VISIBLE);
-    private SimpleBooleanProperty mRendering = new SimpleBooleanProperty(false);
+    private final ObservableList<Layer> mChildNodes = FXCollections.observableArrayList();
 
-    private final Configuration mConfiguration;
-    private final Scene mScene;
+    private Configuration mConfiguration;
+    private Layer mParent;
 
-    public Layer(Scene scene) {
-        this(scene, null);
+    private final SimpleStringProperty mName = new SimpleStringProperty();
+    private final SimpleBooleanProperty mVisible = new SimpleBooleanProperty(true);
+
+    public Layer() {
+        this(null, null);
     }
 
-    public Layer(Scene scene, Configuration configuration) {
-        if (scene == null) {
-            throw new NullPointerException();
-        }
-        mScene = scene;
-        mConfiguration = configuration == null ? Configuration.EMPTY : configuration;
+    public Layer(String name) {
+        this(name, null);
     }
 
-    public Scene getScene() {
-        return mScene;
+    public Layer(String name, Configuration configuration) {
+        setName(name);
+        setConfiguration(configuration);
+        mVisible.addListener((observable, oldValue, newValue) -> updateChildVisibility(newValue));
     }
 
-    @Override
     public final Configuration getConfiguration() {
         return mConfiguration;
+    }
+
+    public final void setConfiguration(Configuration configuration) {
+        if (configuration == null) {
+            configuration = Configuration.EMPTY;
+        }
+        mConfiguration = configuration;
     }
 
     public String getName() {
@@ -45,37 +50,105 @@ public abstract class Layer implements Configurable {
     }
 
     public void setName(String name) {
-        if (name == null || name.trim().equals("")) {
-            name = toString();
+        if (name == null) {
+            name = getClass().getSimpleName() + "@" + Integer.toHexString(hashCode());
         }
         mName.setValue(name);
-    }
-
-    public Visibility getVisibility() {
-        return mVisible.getValue();
-    }
-
-    public void setVisibility(Visibility visibility) {
-        mVisible.setValue(visibility);
     }
 
     public ObservableValue<String> nameProperty() {
         return mName;
     }
 
-    public ObjectProperty<Visibility> visibilityProperty() {
+    public boolean isVisible() {
+        return mVisible.getValue();
+    }
+
+    public void setVisible(boolean visible) {
+        mVisible.setValue(visible);
+    }
+
+    private void updateChildVisibility(boolean visible) {
+        for (Layer child : mChildNodes) {
+            child.setVisible(visible);
+        }
+    }
+
+    public BooleanProperty visibleProperty() {
         return mVisible;
     }
 
-    public ObservableValue<Boolean> renderingProperty() {
-        return mRendering;
+    // CHILD NODE API /////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public final ObservableList<Layer> getChildNodes() {
+        return FXCollections.unmodifiableObservableList(mChildNodes);
     }
 
-    public final void render(Canvas canvas) {
-        mRendering.setValue(true);
-        onRender(canvas);
-        mRendering.setValue(false);
+    public final int getChildCount() {
+        return mChildNodes.size();
     }
 
-    protected abstract void onRender(Canvas canvas);
+    public final Layer getChildAt(int i) {
+        return mChildNodes.get(i);
+    }
+
+    public final Layer findChildByName(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        if (name.equals(mName.getValue())) {
+            return this;
+        }
+
+        for (Layer child : mChildNodes) {
+            child = child.findChildByName(name);
+            if (child != null) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+
+    public Layer addChild(Layer child) {
+        child.removeFromParent();
+        child.mParent = this;
+        mChildNodes.add(child);
+        return child;
+    }
+
+    public final void removeChild(Layer child) {
+        final int index = indexOf(child);
+        if (index >= 0) {
+            removeChildInternal(index);
+        }
+    }
+
+    public final void removeAllChildren() {
+        for (int i = mChildNodes.size() - 1; i >= 0; i--) {
+            removeChildInternal(i);
+        }
+    }
+
+    private void removeChildInternal(int index) {
+        mChildNodes.get(index).mParent = null;
+        mChildNodes.remove(index);
+    }
+
+    public final int indexOf(Layer child) {
+        return mChildNodes.indexOf(child);
+    }
+
+    public final void removeFromParent() {
+        if (mParent == null) {
+            return;
+        }
+        mParent.removeChild(this);
+    }
+
+    // RENDER API //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // TODO
+
 }

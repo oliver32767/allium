@@ -1,25 +1,20 @@
 package io.firstwave.allium.viewer;
 
 import io.firstwave.allium.Const;
-import io.firstwave.allium.api.*;
+import io.firstwave.allium.api.Configuration;
+import io.firstwave.allium.api.Layer;
+import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.demo.DemoScene;
-import io.firstwave.allium.viewer.scene_tree.SceneItem;
-import io.firstwave.allium.viewer.scene_tree.TreeTableVisibilityCell;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -28,8 +23,6 @@ import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -81,11 +74,11 @@ public class SceneViewerController implements Initializable {
     private ScrollPane scrollPane;
 
     @FXML
-    private TreeTableView<SceneItem> sceneTree;
+    private TreeTableView<Layer> sceneTree;
     @FXML
-    private TreeTableColumn<SceneItem, String> treeName;
+    private TreeTableColumn<Layer, String> nodeName;
     @FXML
-    private TreeTableColumn<SceneItem, ObjectProperty<Visibility>> treeVisible;
+    private TreeTableColumn<Layer, Boolean> nodeVisible;
 
 
     private final SimpleBooleanProperty mIsRendering = new SimpleBooleanProperty(false);
@@ -99,13 +92,16 @@ public class SceneViewerController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        treeName.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
-        treeVisible.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue().visibleProperty()));
 
-        treeVisible.setCellFactory(param -> {
-            final TreeTableVisibilityCell rv = new TreeTableVisibilityCell<>();
+        nodeName.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
+        nodeVisible.setCellValueFactory(param -> param.getValue().getValue().visibleProperty());
+        nodeVisible.setCellFactory(param -> {
+            final CheckBoxTreeTableCell<Layer, Boolean> rv = new CheckBoxTreeTableCell<>();
             rv.setAlignment(Pos.CENTER);
             return rv;
+        });
+        sceneTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            updateConfigurationList(newValue.getValue().getConfiguration());
         });
 
         configList.disableProperty().bind(mIsRendering);
@@ -154,12 +150,9 @@ public class SceneViewerController implements Initializable {
                 event -> mConfigurationController.cancel());
 
 
-        mConfigurationController.configurationProperty().addListener(new ChangeListener<Configuration>() {
-            @Override
-            public void changed(ObservableValue<? extends Configuration> observable, Configuration oldValue, Configuration newValue) {
-                configApply.disableProperty().bind(newValue.unchangedProperty());
-                configDiscard.disableProperty().bind(newValue.unchangedProperty());
-            }
+        mConfigurationController.configurationProperty().addListener((observable, oldValue, newValue) -> {
+            configApply.disableProperty().bind(newValue.unchangedProperty());
+            configDiscard.disableProperty().bind(newValue.unchangedProperty());
         });
 
 //        openFile(Prefs.getLastPath());
@@ -222,9 +215,7 @@ public class SceneViewerController implements Initializable {
         if (mSceneType != null) {
             try {
                 scene = mSceneType.newInstance();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
@@ -232,27 +223,41 @@ public class SceneViewerController implements Initializable {
         mScene = scene;
         if (mScene != null) {
             scene.load();
+            setBackgroundColor(mScene.getBackgroundColor());
+            mScene.backgroundColorProperty().addListener((observable, oldValue, newValue) -> {
+                setBackgroundColor(newValue);
+            });
+
         }
         updateSceneTree(mScene);
-        updateConfigurationList(mScene);
         updateTitle();
         render();
     }
 
     private void updateSceneTree(Scene scene) {
         sceneTree.setRoot(null);
-        if (scene == null) {
+        if (scene == null || scene.getRoot() == null) {
             return;
         }
 
-        final TreeItem<SceneItem> root = new TreeItem<>(new SceneItem(scene.toString()));
-        root.setExpanded(true);
-
-        for (Layer l : scene.getLayerList()) {
-            root.getChildren().add(new TreeItem<>(new SceneItem(l.getName(), l.visibilityProperty())));
-        }
-
+        final TreeItem<Layer> root = new TreeItem<>(scene.getRoot());
+        Logger.debug("adding root node:" + scene.getRoot().getName());
         sceneTree.setRoot(root);
+        root.setExpanded(true);
+        addSceneNode(root);
+
+    }
+
+    private void addSceneNode(TreeItem<Layer> root) {
+        for (Layer node : root.getValue().getChildNodes()) {
+            final TreeItem<Layer> treeNode = new TreeItem<>(node);
+            treeNode.setExpanded(true);
+            root.getChildren().add(treeNode);
+            Logger.debug("adding node:" + node.getName());
+            if (node.getChildCount() > 0) {
+                addSceneNode(treeNode);
+            }
+        }
     }
 
     private void zoom(int amount) {
@@ -271,48 +276,49 @@ public class SceneViewerController implements Initializable {
     }
 
     private void render() {
-        if (mIsRendering.getValue()) {
-            Logger.debug("Render in progress -- skipping");
-            return;
-        }
-        layerStack.getChildren().clear();
-
-        if (mScene == null) {
-            setBackgroundColor(Color.TRANSPARENT);
-            return;
-        }
-        setBackgroundColor(mScene.getBackgroundColor());
-
-        final Renderer renderer = mScene.createRenderer();
-//        layerList.setItems(mScene.getLayerList());
-        final List<Layer> layers = new ArrayList<Layer>(mScene.getLayerList());
-        final long startTime = System.currentTimeMillis();
-
-        setStatus("Starting rendering");
-        final Task<Void> renderTask = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                for (Layer layer : layers) {
-                    final Canvas canvas;
-                    try {
-                        setStatus("rendering:" + layer.getName());
-                        canvas = renderer.render(layer);
-//                        canvas.visibleProperty().bind(layer.visibleProperty());
-                        Platform.runLater(() -> layerStack.getChildren().add(canvas));
-                    } catch (Exception e) {
-                        Logger.warn(e);
-                    }
-                }
-                mIsRendering.setValue(false);
-                final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
-                setStatus(String.format("Rendered in %.4f second(s)", elapsed));
-                return null;
-            }
-        };
-        mIsRendering.setValue(true);
-        Thread th = new Thread(renderTask);
-        th.setDaemon(true);
-        th.start();
+        Logger.debug("render");
+//        if (mIsRendering.getValue()) {
+//            Logger.debug("Render in progress -- skipping");
+//            return;
+//        }
+//        layerStack.getChildren().clear();
+//
+//        if (mScene == null) {
+//            setBackgroundColor(Color.TRANSPARENT);
+//            return;
+//        }
+//        setBackgroundColor(mScene.getBackgroundColor());
+//
+//        final Renderer renderer = mScene.createRenderer();
+////        layerList.setItems(mScene.getLayerList());
+//        final List<Layer> layers = new ArrayList<Layer>(mScene.getLayerList());
+//        final long startTime = System.currentTimeMillis();
+//
+//        setStatus("Starting rendering");
+//        final Task<Void> renderTask = new Task<Void>() {
+//            @Override
+//            protected Void call() throws Exception {
+//                for (Layer layer : layers) {
+//                    final Canvas canvas;
+//                    try {
+//                        setStatus("rendering:" + layer.getName());
+//                        canvas = renderer.render(layer);
+////                        canvas.visibleProperty().bind(layer.visibleProperty());
+//                        Platform.runLater(() -> layerStack.getChildren().add(canvas));
+//                    } catch (Exception e) {
+//                        Logger.warn(e);
+//                    }
+//                }
+//                mIsRendering.setValue(false);
+//                final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
+//                setStatus(String.format("Rendered in %.4f second(s)", elapsed));
+//                return null;
+//            }
+//        };
+//        mIsRendering.setValue(true);
+//        Thread th = new Thread(renderTask);
+//        th.setDaemon(true);
+//        th.start();
     }
 
     private void setBackgroundColor(Color color) {
@@ -337,7 +343,7 @@ public class SceneViewerController implements Initializable {
         Platform.runLater(() -> statusLeft.setText(status));
     }
 
-    private void updateConfigurationList(Configurable configurable) {
+    private void updateConfigurationList(Configuration configuration) {
 
         if (mOnConfigurationChangedListener == null) {
             mOnConfigurationChangedListener = config -> render();
@@ -346,13 +352,14 @@ public class SceneViewerController implements Initializable {
         configList.getChildren().clear();
 
 
-        final Configuration config = configurable.getConfiguration();
         final Configuration old = mConfigurationController.configurationProperty().getValue();
 
         if (old != null) {
             old.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         }
-        config.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        mConfigurationController.configurationProperty().setValue(config);
+        if (configuration != null) {
+            configuration.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        }
+        mConfigurationController.configurationProperty().setValue(configuration);
     }
 }

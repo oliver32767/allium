@@ -43,10 +43,16 @@ public final class Configuration {
     }
 
     public boolean addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
+        if (this == EMPTY) {
+            return false;
+        }
         return mConfigurationChangedListeners.add(listener);
     }
 
     public boolean removeOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
+        if (this == EMPTY) {
+            return false;
+        }
         return mConfigurationChangedListeners.remove(listener);
     }
 

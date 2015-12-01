@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
-public class Main extends Application {
+public class Allium extends Application {
 
 
     @Override

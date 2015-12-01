@@ -9,7 +9,7 @@ import java.util.prefs.Preferences;
 public class Prefs {
 
     public static File getLastPath() {
-        Preferences prefs = Preferences.userNodeForPackage(Main.class);
+        Preferences prefs = Preferences.userNodeForPackage(Allium.class);
         String filePath = prefs.get("lastPath", null);
         if (filePath != null) {
             return new File(filePath);
@@ -19,7 +19,7 @@ public class Prefs {
     }
 
     public static void setLastPath(File file) {
-        Preferences prefs = Preferences.userNodeForPackage(Main.class);
+        Preferences prefs = Preferences.userNodeForPackage(Allium.class);
         if (file != null) {
             prefs.put("lastPath", file.getPath());
         } else {
