@@ -1,9 +1,9 @@
 package io.firstwave.allium;
 
-import io.firstwave.allium.core.Configuration;
-import io.firstwave.allium.core.Layer;
-import io.firstwave.allium.core.Renderer;
-import io.firstwave.allium.core.Scene;
+import io.firstwave.allium.api.Configuration;
+import io.firstwave.allium.api.Layer;
+import io.firstwave.allium.api.Renderer;
+import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.viewer.ConfigurationController;
 import io.firstwave.allium.utils.FxUtils;
 import io.firstwave.allium.viewer.FileOpener;

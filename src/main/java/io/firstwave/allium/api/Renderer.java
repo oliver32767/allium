@@ -1,4 +1,4 @@
-package io.firstwave.allium.core;
+package io.firstwave.allium.api;
 
 import javafx.scene.canvas.Canvas;
 

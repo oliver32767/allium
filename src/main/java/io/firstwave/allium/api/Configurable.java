@@ -1,4 +1,4 @@
-package io.firstwave.allium.core;
+package io.firstwave.allium.api;
 
 /**
  * Created by obartley on 11/27/15.

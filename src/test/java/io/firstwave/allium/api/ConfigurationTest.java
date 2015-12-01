@@ -1,4 +1,4 @@
-package io.firstwave.allium.core;
+package io.firstwave.allium.api;
 
 import org.junit.Before;
 import org.junit.Test;

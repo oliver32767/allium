@@ -1,6 +1,6 @@
 package io.firstwave.allium.viewer;
 
-import io.firstwave.allium.core.Configuration;
+import io.firstwave.allium.api.Configuration;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

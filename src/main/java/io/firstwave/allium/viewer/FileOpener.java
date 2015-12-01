@@ -1,6 +1,6 @@
 package io.firstwave.allium.viewer;
 
-import io.firstwave.allium.core.Scene;
+import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.demo.DemoScene;
 
 import java.io.File;

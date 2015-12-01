@@ -1,8 +1,8 @@
 package io.firstwave.allium.demo;
 
-import io.firstwave.allium.core.Configuration;
-import io.firstwave.allium.core.Layer;
-import io.firstwave.allium.core.Scene;
+import io.firstwave.allium.api.Configuration;
+import io.firstwave.allium.api.Layer;
+import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.gen.SimplexNoiseGenerator;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
