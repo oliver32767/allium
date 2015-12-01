@@ -4,8 +4,9 @@ import io.firstwave.allium.core.Configuration;
 import io.firstwave.allium.core.Layer;
 import io.firstwave.allium.core.Renderer;
 import io.firstwave.allium.core.Scene;
-import io.firstwave.allium.ui.util.ConfigurationController;
-import io.firstwave.allium.ui.util.ControlUtils;
+import io.firstwave.allium.viewer.ConfigurationController;
+import io.firstwave.allium.utils.FxUtils;
+import io.firstwave.allium.viewer.FileOpener;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -113,7 +114,7 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        ControlUtils.disableColumnReordering(layerList);
+        FxUtils.disableColumnReordering(layerList);
         layerList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         layerVisibility.setEditable(true);
         layerList.setEditable(true);

@@ -1,4 +1,4 @@
-package io.firstwave.allium.ui.util;
+package io.firstwave.allium.viewer;
 
 import io.firstwave.allium.core.Configuration;
 import javafx.beans.property.SimpleObjectProperty;

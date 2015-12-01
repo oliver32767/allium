@@ -17,13 +17,13 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
+        final FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/scene_viewer.fxml"));
         final ResourceBundle rb = getResourceBundle();
         loader.setResources(rb);
 
         final Parent root = loader.load();
-        final MainController controller = loader.getController();
-        controller.setStage(primaryStage);
+//        final MainController controller = loader.getController();
+//        controller.setStage(primaryStage);
         primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

@@ -1,4 +1,4 @@
-package io.firstwave.allium.ui.util;
+package io.firstwave.allium.utils;
 
 import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import javafx.beans.value.ChangeListener;
@@ -9,8 +9,7 @@ import javafx.scene.layout.Pane;
 /**
  * Created by obartley on 11/27/15.
  */
-public class ControlUtils
-{
+public class FxUtils {
     public static void disableColumnReordering(final TableView<?> tableView) {
         tableView.widthProperty().addListener(new ChangeListener<Number>()
         {

@@ -1,4 +1,4 @@
-package io.firstwave.allium;
+package io.firstwave.allium.viewer;
 
 import io.firstwave.allium.core.Scene;
 import io.firstwave.allium.demo.DemoScene;
