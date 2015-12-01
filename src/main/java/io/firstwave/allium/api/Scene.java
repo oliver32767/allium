@@ -101,8 +101,8 @@ public abstract class Scene implements Configurable {
             mLayer.setName(name);
             return this;
         }
-        public LayerEditor setVisibile(boolean visibility) {
-            mLayer.setVisible(visibility);
+        public LayerEditor setVisibility(Visibility visibility) {
+            mLayer.setVisibility(visibility);
             return this;
         }
     }

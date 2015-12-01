@@ -2,6 +2,7 @@ package io.firstwave.allium.demo;
 
 import io.firstwave.allium.api.Configuration;
 import io.firstwave.allium.api.Scene;
+import io.firstwave.allium.api.Visibility;
 import javafx.scene.paint.Color;
 
 /**
@@ -39,7 +40,7 @@ public class DemoScene extends Scene {
                 .addIntegerItem("g", 0)
                 .addIntegerItem("b", 255)
                 .build()
-        )).setName("Blue").setVisibile(false);
+        )).setName("Blue").setVisibility(Visibility.GONE);
 
         setBackgroundColor(Color.BLACK);
     }

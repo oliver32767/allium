@@ -4,8 +4,8 @@ import io.firstwave.allium.api.Configuration;
 import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.Renderer;
 import io.firstwave.allium.api.Scene;
-import io.firstwave.allium.viewer.ConfigurationController;
 import io.firstwave.allium.utils.FxUtils;
+import io.firstwave.allium.viewer.ConfigurationController;
 import io.firstwave.allium.viewer.FileOpener;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,8 +20,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
@@ -120,10 +118,10 @@ public class MainController implements Initializable {
         layerList.setEditable(true);
 
 
-        layerVisibility.setCellValueFactory(new PropertyValueFactory<Layer, Boolean>(Layer.PROPERTY_VISIBLE));
-        layerVisibility.setCellFactory(CheckBoxTableCell.forTableColumn(layerVisibility));
-
-        layerName.setCellValueFactory(new PropertyValueFactory<Layer, String>(Layer.PROPERTY_NAME));
+//        layerVisibility.setCellValueFactory(new PropertyValueFactory<Layer, Boolean>(Layer.PROPERTY_VISIBLE));
+//        layerVisibility.setCellFactory(CheckBoxTableCell.forTableColumn(layerVisibility));
+//
+//        layerName.setCellValueFactory(new PropertyValueFactory<Layer, String>(Layer.PROPERTY_NAME));
 
         layerList.getSelectionModel().getSelectedCells().addListener(new ListChangeListener<TablePosition>() {
             @Override
@@ -369,7 +367,7 @@ public class MainController implements Initializable {
                     try {
                         setStatus("rendering:" + layer.getName());
                         canvas = renderer.render(layer);
-                        canvas.visibleProperty().bind(layer.visibleProperty());
+//                        canvas.visibleProperty().bind(layer.visibleProperty());
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {

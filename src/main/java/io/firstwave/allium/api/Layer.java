@@ -1,6 +1,8 @@
 package io.firstwave.allium.api;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.canvas.Canvas;
@@ -10,12 +12,8 @@ import javafx.scene.canvas.Canvas;
  */
 public abstract class Layer implements Configurable {
 
-    public static final String PROPERTY_NAME = "name";
-    public static final String PROPERTY_VISIBLE = "visible";
-    public static final String PROPERTY_RENDERING = "rendering";
-
     private SimpleStringProperty mName = new SimpleStringProperty(toString());
-    private SimpleBooleanProperty mVisible = new SimpleBooleanProperty(true);
+    private SimpleObjectProperty<Visibility> mVisible = new SimpleObjectProperty<>(Visibility.VISIBLE);
     private SimpleBooleanProperty mRendering = new SimpleBooleanProperty(false);
 
     private final Configuration mConfiguration;
@@ -53,19 +51,19 @@ public abstract class Layer implements Configurable {
         mName.setValue(name);
     }
 
-    public boolean isVisible() {
+    public Visibility getVisibility() {
         return mVisible.getValue();
     }
 
-    public void setVisible(boolean visible) {
-        mVisible.setValue(visible);
+    public void setVisibility(Visibility visibility) {
+        mVisible.setValue(visibility);
     }
 
     public ObservableValue<String> nameProperty() {
         return mName;
     }
 
-    public ObservableValue<Boolean> visibleProperty() {
+    public ObjectProperty<Visibility> visibilityProperty() {
         return mVisible;
     }
 
