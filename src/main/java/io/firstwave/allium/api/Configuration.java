@@ -1,5 +1,6 @@
 package io.firstwave.allium.api;
 
+import io.firstwave.allium.utils.ThreadEnforcer;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import org.pmw.tinylog.Logger;
@@ -22,24 +23,23 @@ public final class Configuration {
 
     private final Map<String, Item> mItems;
     private final Map<String, Object> mValues;
-    private final Map<String, String> mDescriptions;
 
     private final Set<OnConfigurationChangedListener> mConfigurationChangedListeners = new HashSet<OnConfigurationChangedListener>();
 
     private final SimpleBooleanProperty mUnchanged = new SimpleBooleanProperty(true);
 
+    ThreadEnforcer mThreadEnforcer = ThreadEnforcer.MAIN;
+
     private Editor mEditor;
 
     private Configuration() {
-        mItems = new HashMap<String, Item>();
-        mValues = new HashMap<String, Object>();
-        mDescriptions = new HashMap<String, String>();
+        mItems = new HashMap<>();
+        mValues = new HashMap<>();
     }
 
     private Configuration(Builder b) {
-        mItems = new LinkedHashMap<String, Item>(b.mItems);
-        mValues = new HashMap<String, Object>(b.mValues);
-        mDescriptions = new HashMap<String, String>(b.mDescriptions);
+        mItems = new LinkedHashMap<>(b.mItems);
+        mValues = new HashMap<>(b.mValues);
     }
 
     public boolean addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {
@@ -78,10 +78,6 @@ public final class Configuration {
             return mValues.get(key);
         }
         return null;
-    }
-
-    public String getDescription(String key) {
-        return mDescriptions.getOrDefault(key, null);
     }
     
     public boolean getOption(String key) {
@@ -140,7 +136,11 @@ public final class Configuration {
         return (String) mValues.get(key);
     }
 
+    /**
+     * Main thread only
+     */
     private void apply(Editor editor) {
+        mThreadEnforcer.enforce();
         cancel(editor);
         final Map<String, Object> changes = new HashMap<String, Object>(editor.mChanges);
         for (String key : changes.keySet()) {
@@ -150,7 +150,11 @@ public final class Configuration {
         dispatchConfigurationChanged();
     }
 
+    /**
+     * Main thread only
+     */
     private void cancel(Editor editor) {
+        mThreadEnforcer.enforce();
         if (mEditor == null || mEditor != editor) {
             throw new IllegalStateException("Invalid editor!");
         }
@@ -158,7 +162,11 @@ public final class Configuration {
         mUnchanged.setValue(true);
     }
 
+    /**
+     * Main thread only
+     */
     public Editor edit() {
+        mThreadEnforcer.enforce();
         if (mEditor == null) {
             mEditor = new Editor();
         }
@@ -276,14 +284,8 @@ public final class Configuration {
     }
 
     public static final class Builder {
-        private Map<String, Item> mItems = new LinkedHashMap<String, Item>();
-        private Map<String, Object> mValues = new HashMap<String, Object>();
-        private Map<String, String> mDescriptions = new HashMap<String, String>();
-
-        public Builder setDescription(String key, String description) {
-            mDescriptions.put(key, description);
-            return this;
-        }
+        private Map<String, Item> mItems = new LinkedHashMap<>();
+        private Map<String, Object> mValues = new HashMap<>();
 
         public Builder addOptionItem(String key, boolean defaultValue) {
             final Item item = new Item(Type.OPTION, null);

@@ -3,16 +3,19 @@ package io.firstwave.allium.viewer;
 import io.firstwave.allium.Const;
 import io.firstwave.allium.api.Configuration;
 import io.firstwave.allium.api.Layer;
+import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.demo.DemoScene;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.layout.StackPane;
@@ -276,49 +279,66 @@ public class SceneViewerController implements Initializable {
     }
 
     private void render() {
-        Logger.debug("render");
-//        if (mIsRendering.getValue()) {
-//            Logger.debug("Render in progress -- skipping");
-//            return;
-//        }
-//        layerStack.getChildren().clear();
-//
-//        if (mScene == null) {
-//            setBackgroundColor(Color.TRANSPARENT);
-//            return;
-//        }
-//        setBackgroundColor(mScene.getBackgroundColor());
-//
-//        final Renderer renderer = mScene.createRenderer();
-////        layerList.setItems(mScene.getLayerList());
-//        final List<Layer> layers = new ArrayList<Layer>(mScene.getLayerList());
-//        final long startTime = System.currentTimeMillis();
-//
-//        setStatus("Starting rendering");
-//        final Task<Void> renderTask = new Task<Void>() {
-//            @Override
-//            protected Void call() throws Exception {
-//                for (Layer layer : layers) {
-//                    final Canvas canvas;
-//                    try {
-//                        setStatus("rendering:" + layer.getName());
-//                        canvas = renderer.render(layer);
-////                        canvas.visibleProperty().bind(layer.visibleProperty());
-//                        Platform.runLater(() -> layerStack.getChildren().add(canvas));
-//                    } catch (Exception e) {
-//                        Logger.warn(e);
-//                    }
-//                }
-//                mIsRendering.setValue(false);
-//                final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
-//                setStatus(String.format("Rendered in %.4f second(s)", elapsed));
-//                return null;
-//            }
-//        };
-//        mIsRendering.setValue(true);
-//        Thread th = new Thread(renderTask);
-//        th.setDaemon(true);
-//        th.start();
+        if (mIsRendering.getValue() || mScene == null) {
+            Logger.debug("Skipping render");
+            return;
+        }
+
+        final RenderContext ctx = new RenderContext(mScene.getWidth(), mScene.getHeight()) {
+            @Override
+            public void publish(final Layer layer) {
+                // called on the render thread, we need to push it back to the main thread
+                if (layer != null) {
+                    final Canvas canvas = layer.getCanvas();
+                    if (canvas != null) {
+                        Logger.debug("publishing:" + layer);
+                        Platform.runLater(() -> SceneViewerController.this.publish(layer, canvas));
+                    }
+                }
+            }
+        };
+
+        final long startTime = System.currentTimeMillis();
+        setStatus("Starting rendering");
+        final Task<Void> renderTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                mScene.render(ctx);
+
+                if (ctx.getException() != null) {
+                    throw new RuntimeException(ctx.getException());
+                }
+
+                final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
+                setStatus(String.format("Rendered in %.4f second(s)", elapsed));
+                return null;
+            }
+
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+            @Override
+            protected void failed() {
+                mIsRendering.setValue(false);
+                final Throwable tr = getException();
+                setStatus("Rendering failed: " + tr.getMessage());
+            }
+
+            @Override
+            protected void succeeded() {
+                mIsRendering.setValue(false);
+            }
+        };
+
+        layerStack.getChildren().clear();
+
+        mIsRendering.setValue(true);
+        Thread th = new Thread(renderTask);
+        th.setDaemon(true);
+        th.start();
+    }
+
+    private void publish(Layer layer, Canvas canvas) {
+        Logger.debug("published:" + layer);
+        layerStack.getChildren().add(canvas);
     }
 
     private void setBackgroundColor(Color color) {

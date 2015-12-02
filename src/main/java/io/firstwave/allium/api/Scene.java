@@ -3,6 +3,7 @@ package io.firstwave.allium.api;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.paint.Color;
+import org.pmw.tinylog.Logger;
 
 /**
  * Created by obartley on 12/1/15.
@@ -54,8 +55,29 @@ public abstract class Scene {
     
     protected abstract Layer onCreate();
 
-    public final void render() {
-        
+    /**
+     * Executed in render thread
+     */
+    public final void render(RenderContext ctx) {
+        if (mRoot == null) {
+            return;
+        }
+
+        // prepare layers for rendering
+        mRoot.each(layer -> {
+            Logger.trace("onPreRender:" + layer);
+            layer.onPreRender(ctx);
+        });
+        try {
+            onRender();
+        } catch (Throwable t) {
+            ctx.setException(t);
+        }
+
+        mRoot.each(layer -> {
+            Logger.trace("onPostRender:" + layer);
+            layer.onPostRender();
+        });
     }
 
     protected abstract void onRender();
