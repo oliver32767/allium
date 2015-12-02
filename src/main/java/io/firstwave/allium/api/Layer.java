@@ -3,11 +3,13 @@ package io.firstwave.allium.api;
 import io.firstwave.allium.utils.ThreadEnforcer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
+import org.pmw.tinylog.Logger;
 
 /**
  * Created by obartley on 12/1/15.
@@ -23,7 +25,8 @@ public class Layer implements Configurable {
 
     private final SimpleStringProperty mName = new SimpleStringProperty();
     private final SimpleBooleanProperty mVisible = new SimpleBooleanProperty(true);
-    private final SimpleBooleanProperty mRendering = new SimpleBooleanProperty(false);
+
+    private final SimpleObjectProperty<RenderState> mRenderState = new SimpleObjectProperty<>(RenderState.IDLE);
 
     ThreadEnforcer mThreadEnforcer = ThreadEnforcer.MAIN;
 
@@ -100,12 +103,12 @@ public class Layer implements Configurable {
         }
     }
 
-    public BooleanProperty visibleProperty() {
+    public final BooleanProperty visibleProperty() {
         return mVisible;
     }
 
-    public final ObservableValue<Boolean> renderingProperty() {
-        return mRendering;
+    public final ObservableValue<RenderState> renderStateProperty() {
+        return mRenderState;
     }
 
     // CHILD NODE API /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -198,44 +201,43 @@ public class Layer implements Configurable {
 
     // RENDER API //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    final void onPreRender(RenderContext ctx) {
-        mRendering.setValue(true);
+    final void preRender(RenderContext ctx) {
+        Logger.warn("preRender:" + this);
+        ThreadEnforcer.MAIN.enforce();
+        mRenderState.setValue(RenderState.RENDERING);
         mRenderContext = ctx;
         mCanvas = onCreateCanvas(ctx);
+        onPreRender(ctx);
     }
 
-    /**
-     * Executed in render thread
-     */
     protected Canvas onCreateCanvas(RenderContext ctx) {
         return new Canvas(ctx.width, ctx.height);
     }
 
-    /**
-     * Executed in render thread
-     */
+    protected void onPreRender(RenderContext ctx) {}
+
+    final void render(RenderContext ctx) {
+        ThreadEnforcer.BACKGROUND.enforce();
+        if (mRenderState.getValue() == RenderState.RENDERING) {
+            onRender(ctx);
+        }
+    }
+
+    protected void onRender(RenderContext ctx) {}
+
     public final void publish() {
-        if (isPublished()) {
+        if (mRenderState.getValue() != RenderState.RENDERING) {
             return;
         }
-        mCanvas.visibleProperty().bind(visibleProperty());
-        mRenderContext.publish(this);
+        if (mCanvas != null) {
+            mCanvas.visibleProperty().bind(visibleProperty());
+            mRenderContext.publish(this);
+        }
+
+        mRenderState.setValue(RenderState.PUBLISHED);
+
         mRenderContext = null;
         mCanvas = null;
-    }
-
-    /**
-     * Render thread
-     */
-    public final boolean isPublished() {
-        return mRenderContext == null;
-    }
-
-    /**
-     * Executed in render thread
-     */
-    public final void onPostRender() {
-       publish();
     }
 
     // VISITOR API /////////////////////////////////////////////////////////////////////////////////////////////////////

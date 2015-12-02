@@ -1,6 +1,7 @@
 package io.firstwave.allium.demo;
 
 import io.firstwave.allium.api.Configuration;
+import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.api.Layer;
 import javafx.scene.paint.Color;
@@ -43,7 +44,7 @@ public class DemoScene extends Scene {
 
 
     @Override
-    protected void onRender() {
+    protected void onRender(RenderContext ctx) {
         if (getOpt(getRoot(), "Option")) {
             gc(foo).setFill(Color.BLUE);
         } else {

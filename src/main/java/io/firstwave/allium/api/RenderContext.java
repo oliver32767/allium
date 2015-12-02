@@ -11,8 +11,6 @@ public final class RenderContext {
     private final Publisher mPublisher;
     private final LogWriter mLogWriter;
 
-    private Throwable mException;
-
     public RenderContext(double width, double height, Publisher publisher, LogWriter logWriter) {
         this.width = width;
         this.height = height;
@@ -24,16 +22,8 @@ public final class RenderContext {
         mPublisher.publish(layer);
     }
 
-    public final void log(String tag, String message) {
-        mLogWriter.log(tag, message);
-    }
-
-    final void setException(Throwable exception) {
-        mException = exception;
-    }
-
-    public final Throwable getException() {
-        return mException;
+    public final void log(String message) {
+        mLogWriter.log(message);
     }
 
     public interface Publisher {
@@ -41,6 +31,6 @@ public final class RenderContext {
     }
 
     public interface LogWriter {
-        void log(String tag, String message);
+        void log(String message);
     }
 }

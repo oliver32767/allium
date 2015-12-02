@@ -7,9 +7,6 @@ import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.demo.DemoScene;
 import io.firstwave.allium.utils.FXUtils;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -85,8 +82,6 @@ public class SceneViewerController implements Initializable {
     private TreeTableColumn<Layer, Boolean> nodeVisible;
 
 
-    private final SimpleBooleanProperty mIsRendering = new SimpleBooleanProperty(false);
-
     private ConfigurationController mConfigurationController;
     private Stage mStage;
     private Scene mScene;
@@ -108,7 +103,7 @@ public class SceneViewerController implements Initializable {
             updateConfigurationList(newValue.getValue().getConfiguration());
         });
 
-        configList.disableProperty().bind(mIsRendering);
+//        configList.disableProperty().bind(mIsRendering);
 
         menuOpen.setOnAction(event -> open());
 
@@ -199,10 +194,10 @@ public class SceneViewerController implements Initializable {
             menuNoZoom.disableProperty().unbind();
             menuNoZoom.setDisable(true);
         } else {
-            menuRender.disableProperty().bind(mIsRendering);
-            menuZoomIn.disableProperty().bind(mIsRendering);
-            menuZoomOut.disableProperty().bind(mIsRendering);
-            menuNoZoom.disableProperty().bind(mIsRendering);
+//            menuRender.disableProperty().bind(mIsRendering);
+//            menuZoomIn.disableProperty().bind(mIsRendering);
+//            menuZoomOut.disableProperty().bind(mIsRendering);
+//            menuNoZoom.disableProperty().bind(mIsRendering);
         }
         mSceneType = sceneType;
         reload();
@@ -279,10 +274,12 @@ public class SceneViewerController implements Initializable {
     }
 
     private void render() {
-        if (mIsRendering.getValue() || mScene == null) {
+        if (mScene == null) {
             Logger.debug("Skipping render");
             return;
         }
+
+        layerStack.getChildren().clear();
 
         final RenderContext ctx = new RenderContext(mScene.getWidth(), mScene.getHeight(),
                 layer -> {
@@ -291,50 +288,13 @@ public class SceneViewerController implements Initializable {
                         final Canvas canvas = layer.getCanvas();
                         if (canvas != null) {
                             Logger.debug("publishing:" + layer);
-                            Platform.runLater(() -> SceneViewerController.this.publish(layer, canvas));
+                            FXUtils.runOnMainThread(() -> SceneViewerController.this.publish(layer, canvas));
                         }
                     }
                 },
-                (tag, message) -> {
-                    Logger.debug(tag + ": " + message);
-                });
+                Logger::debug);
 
-        final long startTime = System.currentTimeMillis();
-        setStatus("Starting rendering");
-        final Task<Void> renderTask = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                mScene.render(ctx);
-
-                if (ctx.getException() != null) {
-                    throw new RuntimeException(ctx.getException());
-                }
-
-                final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
-                setStatus(String.format("Rendered in %.4f second(s)", elapsed));
-                return null;
-            }
-
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-            @Override
-            protected void failed() {
-                mIsRendering.setValue(false);
-                final Throwable tr = getException();
-                setStatus("Rendering failed: " + tr.getMessage());
-            }
-
-            @Override
-            protected void succeeded() {
-                mIsRendering.setValue(false);
-            }
-        };
-
-        layerStack.getChildren().clear();
-
-        mIsRendering.setValue(true);
-        Thread th = new Thread(renderTask);
-        th.setDaemon(true);
-        th.start();
+        mScene.render(ctx);
     }
 
     private void publish(Layer layer, Canvas canvas) {
