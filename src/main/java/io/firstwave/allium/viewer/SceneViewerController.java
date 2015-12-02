@@ -6,6 +6,7 @@ import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.demo.DemoScene;
+import io.firstwave.allium.utils.FXUtils;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
@@ -162,7 +163,6 @@ public class SceneViewerController implements Initializable {
     }
 
 
-
     public void setStage(Stage stage) {
         mStage = stage;
         updateTitle();
@@ -284,19 +284,20 @@ public class SceneViewerController implements Initializable {
             return;
         }
 
-        final RenderContext ctx = new RenderContext(mScene.getWidth(), mScene.getHeight()) {
-            @Override
-            public void publish(final Layer layer) {
-                // called on the render thread, we need to push it back to the main thread
-                if (layer != null) {
-                    final Canvas canvas = layer.getCanvas();
-                    if (canvas != null) {
-                        Logger.debug("publishing:" + layer);
-                        Platform.runLater(() -> SceneViewerController.this.publish(layer, canvas));
+        final RenderContext ctx = new RenderContext(mScene.getWidth(), mScene.getHeight(),
+                layer -> {
+                    // called on the render thread, we need to push it back to the main thread
+                    if (layer != null) {
+                        final Canvas canvas = layer.getCanvas();
+                        if (canvas != null) {
+                            Logger.debug("publishing:" + layer);
+                            Platform.runLater(() -> SceneViewerController.this.publish(layer, canvas));
+                        }
                     }
-                }
-            }
-        };
+                },
+                (tag, message) -> {
+                    Logger.debug(tag + ": " + message);
+                });
 
         final long startTime = System.currentTimeMillis();
         setStatus("Starting rendering");
@@ -356,11 +357,7 @@ public class SceneViewerController implements Initializable {
 
     private void setStatus(final String status) {
         Logger.info(status);
-        if (Platform.isFxApplicationThread()) {
-            statusLeft.textProperty().setValue(status);
-            return;
-        }
-        Platform.runLater(() -> statusLeft.setText(status));
+        FXUtils.runOnMainThread(() -> statusLeft.setText(status));
     }
 
     private void updateConfigurationList(Configuration configuration) {
