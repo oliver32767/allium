@@ -56,6 +56,5 @@ public class NoiseLayer extends Layer {
                 getCanvas().getGraphicsContext2D().getPixelWriter().setColor(x, y, c);
             }
         }
-        throw new RuntimeException("DERP DERP");
     }
 }

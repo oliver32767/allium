@@ -34,7 +34,7 @@ public class DemoScene extends Scene {
         bar =root.addChild(new Layer("bar"));
         spam = new Layer("spam");
         eggs = spam.addChild(new Layer("eggs"));
-
+        eggs.addChild(new TroubleMaker());
         spam.addChild(new Layer());
         spam.addChild(new Layer());
         spam.addChild(new Layer());
