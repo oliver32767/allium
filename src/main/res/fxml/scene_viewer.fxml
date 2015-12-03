@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.paint.*?>
@@ -77,6 +78,9 @@
                             </children>
                         </AnchorPane>
                     </content>
+               <cursor>
+                  <Cursor fx:constant="CROSSHAIR" />
+               </cursor>
                 </ScrollPane>
                 <AnchorPane maxWidth="400.0" minWidth="36.0" prefWidth="250.0">
                     <children>
