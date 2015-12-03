@@ -8,10 +8,6 @@ public class NullableOption<T> extends Option<T> {
         super(type, defaultValue);
     }
 
-    public NullableOption(Class<T> type, T defaultValue, String description) {
-        super(type, defaultValue, description);
-    }
-
     @Override
     public boolean validate(Object value) {
         return value == null || super.validate(value);

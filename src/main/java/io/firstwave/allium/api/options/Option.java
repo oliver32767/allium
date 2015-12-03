@@ -10,16 +10,12 @@ public abstract class Option<T> {
     final T mDefaultValue;
     final Class<T> mType;
 
-    private final String mDescription;
-
     public Option(Class<T> type, T defaultValue) {
-        this(type, defaultValue, null);
-    }
-
-    public Option(Class<T> type, T defaultValue, String description) {
         mType = type;
+        if (!validate(defaultValue)) {
+            throw new IllegalArgumentException("Invalid default value for option:" + toString());
+        }
         mDefaultValue = defaultValue;
-        mDescription = description;
     }
 
     public boolean validate(Object value) {

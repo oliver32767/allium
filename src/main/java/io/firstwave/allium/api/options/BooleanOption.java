@@ -9,8 +9,4 @@ public class BooleanOption extends Option<Boolean> {
         super(Boolean.class, defaultValue);
     }
 
-    public BooleanOption(boolean defaultValue, String description) {
-        super(Boolean.class, defaultValue, description);
-    }
-
 }

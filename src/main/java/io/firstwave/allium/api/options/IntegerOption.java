@@ -9,15 +9,11 @@ public class IntegerOption extends Option<Integer> {
     public final int max;
 
     public IntegerOption(int defaultValue) {
-        this(defaultValue, null);
+        this(defaultValue, 0, 255);
     }
 
-    public IntegerOption(int defaultValue, String description) {
-        this(defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE, description);
-    }
-
-    public IntegerOption(int defaultValue, int min, int max, String description) {
-        super(Integer.class, defaultValue, description);
+    public IntegerOption(int defaultValue, int min, int max) {
+        super(Integer.class, defaultValue);
         this.min = min;
         this.max = max;
     }
