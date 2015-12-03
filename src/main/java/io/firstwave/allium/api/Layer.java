@@ -9,7 +9,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
-import org.pmw.tinylog.Logger;
 
 /**
  * Created by obartley on 12/1/15.
@@ -26,7 +25,7 @@ public class Layer implements Configurable {
     private final SimpleStringProperty mName = new SimpleStringProperty();
     private final SimpleBooleanProperty mVisible = new SimpleBooleanProperty(true);
 
-    private final SimpleObjectProperty<RenderState> mRenderState = new SimpleObjectProperty<>(RenderState.IDLE);
+    private final SimpleObjectProperty<LayerState> mState = new SimpleObjectProperty<>(LayerState.IDLE);
 
     ThreadEnforcer mThreadEnforcer = ThreadEnforcer.MAIN;
 
@@ -80,11 +79,11 @@ public class Layer implements Configurable {
         mName.setValue(name);
     }
 
-    public ObservableValue<String> nameProperty() {
+    public final ObservableValue<String> nameProperty() {
         return mName;
     }
 
-    public boolean isVisible() {
+    public final  boolean isVisible() {
         return mVisible.getValue();
     }
 
@@ -92,7 +91,7 @@ public class Layer implements Configurable {
      * Main thread only
      * @param visible
      */
-    public void setVisible(boolean visible) {
+    public final void setVisible(boolean visible) {
         mThreadEnforcer.enforce();
         mVisible.setValue(visible);
     }
@@ -107,8 +106,8 @@ public class Layer implements Configurable {
         return mVisible;
     }
 
-    public final ObservableValue<RenderState> renderStateProperty() {
-        return mRenderState;
+    public final ObservableValue<LayerState> stateProperty() {
+        return mState;
     }
 
     // CHILD NODE API /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,14 +145,23 @@ public class Layer implements Configurable {
 
     /**
      * Main thread only
-     * @param child
-     * @return
      */
-    public Layer addChild(Layer child) {
+    public final Layer addChild(Layer child) {
         mThreadEnforcer.enforce();
         child.removeFromParent();
         child.mParent = this;
         mChildNodes.add(child);
+        return child;
+    }
+
+    /**
+     * Main thread only
+     */
+    public final Layer addChild(int index, Layer child) {
+        mThreadEnforcer.enforce();
+        child.removeFromParent();
+        child.mParent = this;
+        mChildNodes.add(index, child);
         return child;
     }
 
@@ -202,12 +210,17 @@ public class Layer implements Configurable {
     // RENDER API //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     final void preRender(RenderContext ctx) {
-        Logger.warn("preRender:" + this);
         ThreadEnforcer.MAIN.enforce();
-        mRenderState.setValue(RenderState.RENDERING);
+        mState.setValue(LayerState.RENDERING);
         mRenderContext = ctx;
-        mCanvas = onCreateCanvas(ctx);
-        onPreRender(ctx);
+        try {
+            mCanvas = onCreateCanvas(ctx);
+            onPreRender(ctx);
+        } catch (Throwable tr) {
+            ctx.handleException(this, tr);
+            mCanvas = null;
+            mState.setValue(LayerState.ERROR);
+        }
     }
 
     protected Canvas onCreateCanvas(RenderContext ctx) {
@@ -218,15 +231,22 @@ public class Layer implements Configurable {
 
     final void render(RenderContext ctx) {
         ThreadEnforcer.BACKGROUND.enforce();
-        if (mRenderState.getValue() == RenderState.RENDERING) {
-            onRender(ctx);
+        if (mState.getValue() == LayerState.RENDERING) {
+            try {
+                onRender(ctx);
+            } catch (Throwable tr) {
+                ctx.handleException(this, tr);
+                mState.setValue(LayerState.ERROR);
+            }
         }
+        publish();
     }
 
     protected void onRender(RenderContext ctx) {}
 
     public final void publish() {
-        if (mRenderState.getValue() != RenderState.RENDERING) {
+        if (mState.getValue() != LayerState.RENDERING &&
+                mState.getValue() != LayerState.ERROR) {
             return;
         }
         if (mCanvas != null) {
@@ -234,7 +254,9 @@ public class Layer implements Configurable {
             mRenderContext.publish(this);
         }
 
-        mRenderState.setValue(RenderState.PUBLISHED);
+        if (mState.getValue() != LayerState.ERROR) {
+            mState.setValue(LayerState.PUBLISHED);
+        }
 
         mRenderContext = null;
         mCanvas = null;

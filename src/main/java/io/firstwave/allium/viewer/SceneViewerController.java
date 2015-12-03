@@ -1,10 +1,7 @@
 package io.firstwave.allium.viewer;
 
 import io.firstwave.allium.Const;
-import io.firstwave.allium.api.Configuration;
-import io.firstwave.allium.api.Layer;
-import io.firstwave.allium.api.RenderContext;
-import io.firstwave.allium.api.Scene;
+import io.firstwave.allium.api.*;
 import io.firstwave.allium.demo.DemoScene;
 import io.firstwave.allium.utils.FXUtils;
 import javafx.event.ActionEvent;
@@ -16,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -80,6 +78,8 @@ public class SceneViewerController implements Initializable {
     private TreeTableColumn<Layer, String> nodeName;
     @FXML
     private TreeTableColumn<Layer, Boolean> nodeVisible;
+    @FXML
+    private TreeTableColumn<Layer, LayerState> nodeState;
 
 
     private ConfigurationController mConfigurationController;
@@ -95,10 +95,41 @@ public class SceneViewerController implements Initializable {
         nodeName.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
         nodeVisible.setCellValueFactory(param -> param.getValue().getValue().visibleProperty());
         nodeVisible.setCellFactory(param -> {
-            final CheckBoxTreeTableCell<Layer, Boolean> rv = new CheckBoxTreeTableCell<>();
+            final CheckBoxTreeTableCell<Layer, Boolean> rv =
+                    new CheckBoxTreeTableCell<>();
             rv.setAlignment(Pos.CENTER);
             return rv;
         });
+
+        nodeState.setCellValueFactory(param -> param.getValue().getValue().stateProperty());
+        nodeState.setCellFactory(param -> {
+            final TextFieldTreeTableCell rv =
+                    new TextFieldTreeTableCell<Layer, LayerState>() {
+                @Override
+                public void updateItem(LayerState item, boolean empty) {
+                    if (item == null) {
+                        setText(null);
+                        return;
+                    }
+                    switch (item) {
+                        case IDLE:
+                            setText(null);
+                            break;
+                        case RENDERING:
+                            setText("…");
+                            break;
+                        case PUBLISHED:
+                            setText("✓");
+                            break;
+                        case ERROR:
+                            setText("⚠");
+                    }
+                }
+            };
+            rv.setAlignment(Pos.CENTER);
+            return rv;
+        });
+
         sceneTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             updateConfigurationList(newValue.getValue().getConfiguration());
         });
@@ -292,7 +323,7 @@ public class SceneViewerController implements Initializable {
                         }
                     }
                 },
-                Logger::debug);
+                (source, message) -> Logger.info(source + ": " + message));
 
         mScene.render(ctx);
     }

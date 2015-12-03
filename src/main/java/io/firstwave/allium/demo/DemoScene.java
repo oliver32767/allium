@@ -39,6 +39,7 @@ public class DemoScene extends Scene {
         spam.addChild(new Layer());
         spam.addChild(new Layer());
         root.addChild(spam);
+        root.addChild(new NoiseLayer());
         return root;
     }
 

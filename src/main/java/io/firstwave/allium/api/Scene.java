@@ -76,7 +76,7 @@ public abstract class Scene {
             mRoot.each(layer -> layer.preRender(ctx));
         }
 
-        ctx.log("Starting rendering");
+        ctx.handleMessage(this, "Starting rendering");
         final Task<Void> renderTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
@@ -87,7 +87,7 @@ public abstract class Scene {
                 }
 
                 final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
-                ctx.log(String.format("Rendered in %.4f second(s)", elapsed));
+                ctx.handleMessage(this, String.format("Rendered in %.4f second(s)", elapsed));
                 return null;
             }
 
@@ -100,8 +100,8 @@ public abstract class Scene {
                 final PrintWriter pw = new PrintWriter(sw);
                 Logger.warn(tr);
                 tr.printStackTrace(pw);
-                ctx.log(tr.getMessage());
-                ctx.log(sw.toString());
+                ctx.handleMessage(this, tr.getMessage());
+                ctx.handleMessage(this, sw.toString());
             }
 
             @Override
