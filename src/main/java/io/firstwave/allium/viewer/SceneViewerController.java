@@ -80,6 +80,8 @@ public class SceneViewerController implements Initializable {
     private TreeTableColumn<Layer, Boolean> nodeVisible;
     @FXML
     private TreeTableColumn<Layer, LayerState> nodeState;
+    @FXML
+    private TreeTableColumn<Layer, String> nodeMessage;
 
 
     private ConfigurationController mConfigurationController;
@@ -127,6 +129,23 @@ public class SceneViewerController implements Initializable {
                 }
             };
             rv.setAlignment(Pos.CENTER);
+            return rv;
+        });
+        nodeMessage.setCellValueFactory(param -> param.getValue().getValue().messageProperty());
+        nodeMessage.setCellFactory(param -> {
+            final TextFieldTreeTableCell<Layer, String> rv = new TextFieldTreeTableCell<Layer, String>() {
+                @Override
+                public void updateItem(String item, boolean empty) {
+                    setText(item);
+                    if (item == null) {
+                        Tooltip.install(this, null);
+                        return;
+                    }
+                    Tooltip.install(this, new Tooltip(item));
+                }
+            };
+            rv.setOpacity(0.5);
+
             return rv;
         });
 

@@ -9,6 +9,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
+import org.pmw.tinylog.Logger;
 
 /**
  * Created by obartley on 12/1/15.
@@ -26,6 +27,7 @@ public class Layer implements Configurable {
     private final SimpleBooleanProperty mVisible = new SimpleBooleanProperty(true);
 
     private final SimpleObjectProperty<LayerState> mState = new SimpleObjectProperty<>(LayerState.IDLE);
+    private final SimpleStringProperty mMessage = new SimpleStringProperty();
 
     ThreadEnforcer mThreadEnforcer = ThreadEnforcer.MAIN;
 
@@ -108,6 +110,15 @@ public class Layer implements Configurable {
 
     public final ObservableValue<LayerState> stateProperty() {
         return mState;
+    }
+
+    protected void setMessage(String message) {
+        Logger.warn(message);
+        mMessage.setValue(message);
+    }
+
+    public final ObservableValue<String> messageProperty() {
+        return mMessage;
     }
 
     // CHILD NODE API /////////////////////////////////////////////////////////////////////////////////////////////////
