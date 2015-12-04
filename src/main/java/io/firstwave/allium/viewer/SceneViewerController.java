@@ -1,7 +1,11 @@
 package io.firstwave.allium.viewer;
 
 import io.firstwave.allium.Const;
-import io.firstwave.allium.api.*;
+import io.firstwave.allium.api.Layer;
+import io.firstwave.allium.api.LayerState;
+import io.firstwave.allium.api.RenderContext;
+import io.firstwave.allium.api.Scene;
+import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.demo.DemoScene;
 import io.firstwave.allium.utils.FXUtils;
 import javafx.event.ActionEvent;
@@ -84,12 +88,10 @@ public class SceneViewerController implements Initializable {
     private TreeTableColumn<Layer, String> nodeMessage;
 
 
-    private ConfigurationController mConfigurationController;
+    private OptionsController mOptionsController;
     private Stage mStage;
     private Scene mScene;
     private Class<? extends Scene> mSceneType;
-
-    private Configuration.OnConfigurationChangedListener mOnConfigurationChangedListener;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -150,7 +152,7 @@ public class SceneViewerController implements Initializable {
         });
 
         sceneTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            updateConfigurationList(newValue.getValue().getConfiguration());
+            updateOptionsList(newValue.getValue().getOptions());
         });
 
 //        configList.disableProperty().bind(mIsRendering);
@@ -192,17 +194,22 @@ public class SceneViewerController implements Initializable {
             alert.showAndWait();
         });
 
-        mConfigurationController = new ConfigurationController(configList);
-        configApply.setOnAction(
-                event -> setStatus("Applied " + mConfigurationController.apply() + " change(s)"));
-        configDiscard.setOnAction(
-                event -> mConfigurationController.cancel());
+
+        OptionsController.registerDefaultBinders();
+        mOptionsController = new OptionsController(configList);
 
 
-        mConfigurationController.configurationProperty().addListener((observable, oldValue, newValue) -> {
-            configApply.disableProperty().bind(newValue.unchangedProperty());
-            configDiscard.disableProperty().bind(newValue.unchangedProperty());
-        });
+//        mConfigurationController = new ConfigurationController(configList);
+//        configApply.setOnAction(
+//                event -> setStatus("Applied " + mConfigurationController.apply() + " change(s)"));
+//        configDiscard.setOnAction(
+//                event -> mConfigurationController.cancel());
+
+
+//        mConfigurationController.configurationProperty().addListener((observable, oldValue, newValue) -> {
+//            configApply.disableProperty().bind(newValue.unchangedProperty());
+//            configDiscard.disableProperty().bind(newValue.unchangedProperty());
+//        });
 
 //        openFile(Prefs.getLastPath());
     }
@@ -370,23 +377,23 @@ public class SceneViewerController implements Initializable {
         FXUtils.runOnMainThread(() -> statusLeft.setText(status));
     }
 
-    private void updateConfigurationList(Configuration configuration) {
-
-        if (mOnConfigurationChangedListener == null) {
-            mOnConfigurationChangedListener = config -> render();
-        }
-
-        configList.getChildren().clear();
-
-
-        final Configuration old = mConfigurationController.configurationProperty().getValue();
-
-        if (old != null) {
-            old.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        }
-        if (configuration != null) {
-            configuration.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-        }
-        mConfigurationController.configurationProperty().setValue(configuration);
+    private void updateOptionsList(Options options) {
+//
+//        if (mOnConfigurationChangedListener == null) {
+//            mOnConfigurationChangedListener = config -> render();
+//        }
+//
+//        configList.getChildren().clear();
+//
+//
+//        final Configuration old = mConfigurationController.configurationProperty().getValue();
+//
+//        if (old != null) {
+//            old.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
+//        }
+//        if (configuration != null) {
+//            configuration.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+//        }
+        mOptionsController.optionsProperty().setValue(options);
     }
 }

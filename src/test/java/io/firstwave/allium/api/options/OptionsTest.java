@@ -46,8 +46,8 @@ public class OptionsTest {
 
     @Test
     public void testGetType() throws Exception {
-        assertEquals(Boolean.class, mOptions.getType("boolean"));
-        assertEquals(Integer.class, mOptions.getType("int"));
+        assertEquals(Boolean.class, mOptions.getOption("boolean").getType());
+        assertEquals(Integer.class, mOptions.getOption("int").getType());
     }
 
     @Test

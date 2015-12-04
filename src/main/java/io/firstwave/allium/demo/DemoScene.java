@@ -1,12 +1,14 @@
 package io.firstwave.allium.demo;
 
-import io.firstwave.allium.api.Configuration;
+import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
-import io.firstwave.allium.api.Layer;
+import io.firstwave.allium.api.inject.FieldType;
+import io.firstwave.allium.api.inject.Inject;
+import io.firstwave.allium.api.options.BooleanOption;
+import io.firstwave.allium.api.options.Options;
 import javafx.scene.paint.Color;
 
-import static io.firstwave.allium.api.utils.ConfigurationUtils.getOpt;
 import static io.firstwave.allium.demo.LayerUtils.gc;
 
 /**
@@ -14,7 +16,16 @@ import static io.firstwave.allium.demo.LayerUtils.gc;
  */
 public class DemoScene extends Scene {
 
-    Layer foo, bar, spam, eggs;
+    @Inject
+    Layer foo;
+
+    @Inject(key = "bar")
+    Layer bar;
+
+    @Inject(type = FieldType.LAYER, key = "spam")
+    Layer spam;
+
+    Layer eggs;
 
     @Override
     protected Layer onCreate() {
@@ -24,9 +35,8 @@ public class DemoScene extends Scene {
         setWidth(1024);
         setHeight(1024);
 
-        root.setConfiguration(new Configuration.Builder()
-                .addOptionItem("Option", true)
-                .addIntegerItem("Int", 128)
+        root.setOptions(new Options.Builder()
+                .add("Awesome", new BooleanOption(true))
                 .build()
         );
 
@@ -46,11 +56,11 @@ public class DemoScene extends Scene {
 
     @Override
     protected void onRender(RenderContext ctx) {
-        if (getOpt(getRoot(), "Option")) {
-            gc(foo).setFill(Color.BLUE);
-        } else {
-            gc(foo).setFill(Color.PINK);
-        }
+//        if (getOpt(getRoot(), "Option")) {
+//            gc(foo).setFill(Color.BLUE);
+//        } else {
+//            gc(foo).setFill(Color.PINK);
+//        }
 
         gc(foo).fillRect(750,750,1000,1000);
         foo.publish();

@@ -1,6 +1,8 @@
 package io.firstwave.allium.api.options;
 
 
+import io.firstwave.allium.api.options.binder.DefaultBinder;
+import io.firstwave.allium.api.options.binder.OptionBinder;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.pmw.tinylog.Logger;
@@ -15,6 +17,36 @@ import java.util.Set;
  */
 public final class Options {
 
+    // STATIC BINDER API ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static final OptionBinder sDefaultBinder = new DefaultBinder();
+    private static final Map<Class<? extends Option>, OptionBinder> sBinders = new HashMap<>();
+
+    public static void registerBinder(Class<? extends Option> type, OptionBinder binder) {
+        synchronized (sBinders) {
+            sBinders.put(type, binder);
+        }
+    }
+
+    public static void unregisterBinder(Class<? extends Option> type) {
+        synchronized (sBinders) {
+            sBinders.remove(type);
+        }
+    }
+
+    public static OptionBinder getBinder(Class<? extends Option> type) {
+        synchronized (sBinders) {
+            final OptionBinder rv = sBinders.get(type);
+            if (rv != null) {
+                return rv;
+            } else {
+                return sBinders.getOrDefault(Option.class, sDefaultBinder);
+            }
+        }
+    }
+
+    public static final Options EMPTY = new Options();
+
     public static Options unmodifiableOptions(Options options) {
         return new Options(options, true);
     }
@@ -25,6 +57,11 @@ public final class Options {
     private final Map<String, Object> mValues;
 
     private Editor mEditor;
+
+    private Options() {
+        mItems = new HashMap<>();
+        mValues = new HashMap<>();
+    }
 
     private Options(Options copy, boolean readOnly) {
         mItems = copy.mItems;
@@ -52,16 +89,24 @@ public final class Options {
         return (T) mValues.get(key);
     }
 
+    public Option<?> getOption(String key) {
+        return mItems.get(key);
+    }
+
     @SuppressWarnings("unchecked")
     public <T> Option<T> getOption(Class<T> type, String key) {
         if (!validateType(type, key)) {
             return null;
         }
-        return mItems.get(key);
+        return (Option<T>) getOption(key);
     }
 
-    public Class<?> getType(String key) {
-        return mItems.get(key).mType;
+    public Class<? extends Option> getOptionType(String key) {
+        final Option opt = mItems.get(key);
+        if (opt == null) {
+            return null;
+        }
+        return opt.getClass();
     }
 
     public Set<String> getKeys() {

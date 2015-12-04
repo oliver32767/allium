@@ -1,6 +1,5 @@
-package io.firstwave.allium.viewer.options;
+package io.firstwave.allium.api.options.binder;
 
-import io.firstwave.allium.api.options.OptionBinder;
 import io.firstwave.allium.api.options.Options;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
@@ -11,7 +10,7 @@ import javafx.scene.control.CheckBox;
 public class CheckBoxBinder implements OptionBinder {
 
     @Override
-    public Node bind(final Options options, final String key) {
+    public Node bind(final String key, final Options options) {
         final CheckBox rv = new CheckBox(key);
         rv.setSelected(options.get(Boolean.class, key));
         rv.setOnAction(event -> {

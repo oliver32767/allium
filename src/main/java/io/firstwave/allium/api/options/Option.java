@@ -18,8 +18,12 @@ public abstract class Option<T> {
         mDefaultValue = defaultValue;
     }
 
+    public final Class<T> getType() {
+        return mType;
+    }
+
     public boolean validate(Object value) {
-        return (mType.isInstance(value));
+        return mType.isInstance(value);
     }
 
     public boolean equals(T oldValue, T newValue) {

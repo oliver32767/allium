@@ -1,5 +1,6 @@
 package io.firstwave.allium.api;
 
+import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.utils.ThreadEnforcer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -14,11 +15,11 @@ import org.pmw.tinylog.Logger;
 /**
  * Created by obartley on 12/1/15.
  */
-public class Layer implements Configurable {
+public class Layer {
 
     private final ObservableList<Layer> mChildNodes = FXCollections.observableArrayList();
 
-    private Configuration mConfiguration;
+    private Options mOptions;
     private Layer mParent;
     private RenderContext mRenderContext;
     private Canvas mCanvas;
@@ -39,31 +40,28 @@ public class Layer implements Configurable {
         this(name, null);
     }
 
-    public Layer(String name, Configuration configuration) {
+    public Layer(String name, Options options) {
         setName(name);
-        setConfiguration(configuration);
+        setOptions(options);
         mVisible.addListener((observable, oldValue, newValue) -> updateChildVisibility(newValue));
     }
 
-    @Override
-    public final Configuration getConfiguration() {
-        return mConfiguration;
-    }
-
-    public final Canvas getCanvas() {
-        return mCanvas;
+    public final Options getOptions() {
+        return mOptions;
     }
 
     /**
      * Main thread only
      */
-    public final void setConfiguration(Configuration configuration) {
+    public final void setOptions(Options configuration) {
         mThreadEnforcer.enforce();
         if (configuration == null) {
-            configuration = Configuration.EMPTY;
+            configuration = Options.EMPTY;
         }
-        mConfiguration = configuration;
+        mOptions = configuration;
     }
+
+
 
     public String getName() {
         return mName.getValue();
@@ -236,6 +234,10 @@ public class Layer implements Configurable {
 
     protected Canvas onCreateCanvas(RenderContext ctx) {
         return new Canvas(ctx.width, ctx.height);
+    }
+
+    public final Canvas getCanvas() {
+        return mCanvas;
     }
 
     protected void onPreRender(RenderContext ctx) {}
