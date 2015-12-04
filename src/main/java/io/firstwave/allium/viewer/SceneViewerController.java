@@ -8,6 +8,7 @@ import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.demo.DemoScene;
 import io.firstwave.allium.utils.FXUtils;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -93,6 +94,8 @@ public class SceneViewerController implements Initializable {
     private Stage mStage;
     private Scene mScene;
     private Class<? extends Scene> mSceneType;
+
+    private final SimpleBooleanProperty mLocked = new SimpleBooleanProperty(false);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -182,11 +185,16 @@ public class SceneViewerController implements Initializable {
             updateOptionsList(newValue.getValue().getOptions());
         });
 
-//        configList.disableProperty().bind(mIsRendering);
+        configList.disableProperty().bind(mLocked);
 
         menuOpen.setOnAction(event -> open());
         menuReload.setOnAction(event -> reload());
         sceneReload.setOnAction(event -> reload());
+
+        menuRender.disableProperty().bind(mLocked);
+        menuZoomIn.disableProperty().bind(mLocked);
+        menuZoomOut.disableProperty().bind(mLocked);
+        menuNoZoom.disableProperty().bind(mLocked);
 
         final EventHandler<ActionEvent> zoom = event -> {
             final MenuItem mnu = (MenuItem) event.getSource();
@@ -225,11 +233,13 @@ public class SceneViewerController implements Initializable {
         mOptionsController = new OptionsController(configList);
 
 
+        configApply.disableProperty().bind(mLocked);
         configApply.setOnAction(event1 -> {
                     mOptionsController.apply();
                     render();
                 }
         );
+        configDiscard.disableProperty().bind(mLocked);
         configDiscard.setOnAction(event -> mOptionsController.reset());
 
     }
@@ -261,26 +271,15 @@ public class SceneViewerController implements Initializable {
 
     private void setSceneType(Class<? extends Scene> sceneType) {
         menuReload.setDisable(sceneType == null);
-        if (sceneType == null) {
-            menuRender.disableProperty().unbind();
-            menuRender.setDisable(true);
-            menuZoomIn.disableProperty().unbind();
-            menuZoomIn.setDisable(true);
-            menuZoomOut.disableProperty().unbind();
-            menuZoomOut.setDisable(true);
-            menuNoZoom.disableProperty().unbind();
-            menuNoZoom.setDisable(true);
-        } else {
-//            menuRender.disableProperty().bind(mIsRendering);
-//            menuZoomIn.disableProperty().bind(mIsRendering);
-//            menuZoomOut.disableProperty().bind(mIsRendering);
-//            menuNoZoom.disableProperty().bind(mIsRendering);
-        }
         mSceneType = sceneType;
         reload();
     }
 
     private void reload() {
+        // TODO: we should probably handle reload during a long-runnin render a bit better
+        // i think reloading during a render will not prevent RenderContext callbacks from being triggered
+        // we might want to hang on to a render context ref and add a cancel() flag
+
         Logger.trace("reload");
         for (Node node : layerStack.getChildren()) {
             node.visibleProperty().unbind();
@@ -303,7 +302,10 @@ public class SceneViewerController implements Initializable {
             mScene.backgroundColorProperty().addListener((observable, oldValue, newValue) -> {
                 setBackgroundColor(newValue);
             });
-
+            mScene.renderingProperty().addListener((observable, oldValue, newValue) -> {
+                Logger.warn("Rendering lock:" + newValue);
+                mLocked.set(newValue);
+            });
         }
         updateOptionsList(null);
         updateSceneTree(mScene);
@@ -361,7 +363,7 @@ public class SceneViewerController implements Initializable {
     }
 
     private void render() {
-        if (mScene == null) {
+        if (mScene == null || mLocked.getValue()) {
             Logger.debug("Skipping render");
             return;
         }

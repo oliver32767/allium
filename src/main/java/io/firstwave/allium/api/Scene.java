@@ -1,5 +1,6 @@
 package io.firstwave.allium.api;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -62,11 +63,17 @@ public abstract class Scene {
     
     protected abstract Layer onCreate();
 
+    public BooleanProperty renderingProperty() {
+        return mIsRendering;
+    }
+
     public final void render(final RenderContext ctx) {
         if (mIsRendering.getValue()) {
             Logger.debug("Render in progress -- skipping");
             return;
         }
+
+        mIsRendering.setValue(true);
 
         final long startTime = System.currentTimeMillis();
 
