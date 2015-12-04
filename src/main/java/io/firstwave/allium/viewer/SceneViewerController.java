@@ -158,9 +158,8 @@ public class SceneViewerController implements Initializable {
 //        configList.disableProperty().bind(mIsRendering);
 
         menuOpen.setOnAction(event -> open());
-
         menuReload.setOnAction(event -> reload());
-        menuReload.setDisable(true);
+        sceneReload.setOnAction(event -> reload());
 
         final EventHandler<ActionEvent> zoom = event -> {
             final MenuItem mnu = (MenuItem) event.getSource();
@@ -199,19 +198,13 @@ public class SceneViewerController implements Initializable {
         mOptionsController = new OptionsController(configList);
 
 
-//        mConfigurationController = new ConfigurationController(configList);
-//        configApply.setOnAction(
-//                event -> setStatus("Applied " + mConfigurationController.apply() + " change(s)"));
-//        configDiscard.setOnAction(
-//                event -> mConfigurationController.cancel());
+        configApply.setOnAction(event1 -> {
+                    mOptionsController.apply();
+                    render();
+                }
+        );
+        configDiscard.setOnAction(event -> mOptionsController.reset());
 
-
-//        mConfigurationController.configurationProperty().addListener((observable, oldValue, newValue) -> {
-//            configApply.disableProperty().bind(newValue.unchangedProperty());
-//            configDiscard.disableProperty().bind(newValue.unchangedProperty());
-//        });
-
-//        openFile(Prefs.getLastPath());
     }
 
 
@@ -261,6 +254,7 @@ public class SceneViewerController implements Initializable {
     }
 
     private void reload() {
+        Logger.trace("reload");
         for (Node node : layerStack.getChildren()) {
             node.visibleProperty().unbind();
         }
@@ -284,6 +278,7 @@ public class SceneViewerController implements Initializable {
             });
 
         }
+        updateOptionsList(null);
         updateSceneTree(mScene);
         updateTitle();
         render();
@@ -296,8 +291,16 @@ public class SceneViewerController implements Initializable {
         }
 
         final TreeItem<Layer> root = new TreeItem<>(scene.getRoot());
-        Logger.debug("adding root node:" + scene.getRoot().getName());
+        Logger.error("adding root node:" + scene.getRoot().getName());
         sceneTree.setRoot(root);
+
+        if (sceneTree.getSelectionModel().selectedItemProperty().getValue() != null) {
+            final Layer sel = sceneTree.getSelectionModel().selectedItemProperty().getValue().getValue();
+            if (sel != null) {
+                updateOptionsList(sel.getOptions());
+            }
+        }
+
         root.setExpanded(true);
         addSceneNode(root);
 
@@ -344,7 +347,7 @@ public class SceneViewerController implements Initializable {
                     if (layer != null) {
                         final Canvas canvas = layer.getCanvas();
                         if (canvas != null) {
-                            Logger.debug("publishing:" + layer);
+                            Logger.trace("publishing:" + layer);
                             FXUtils.runOnMainThread(() -> SceneViewerController.this.publish(layer, canvas));
                         }
                     }
@@ -378,22 +381,6 @@ public class SceneViewerController implements Initializable {
     }
 
     private void updateOptionsList(Options options) {
-//
-//        if (mOnConfigurationChangedListener == null) {
-//            mOnConfigurationChangedListener = config -> render();
-//        }
-//
-//        configList.getChildren().clear();
-//
-//
-//        final Configuration old = mConfigurationController.configurationProperty().getValue();
-//
-//        if (old != null) {
-//            old.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
-//        }
-//        if (configuration != null) {
-//            configuration.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
-//        }
-        mOptionsController.optionsProperty().setValue(options);
+        mOptionsController.setOptions(options);
     }
 }

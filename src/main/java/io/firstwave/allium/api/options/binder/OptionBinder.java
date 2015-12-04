@@ -8,4 +8,5 @@ import javafx.scene.Node;
  */
 public interface OptionBinder {
     Node bind(final String key, final Options options);
+    void updateValue(Node node, final String key, final Options options);
 }

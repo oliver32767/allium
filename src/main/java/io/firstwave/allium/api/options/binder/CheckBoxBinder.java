@@ -12,10 +12,14 @@ public class CheckBoxBinder implements OptionBinder {
     @Override
     public Node bind(final String key, final Options options) {
         final CheckBox rv = new CheckBox(key);
-        rv.setSelected(options.get(Boolean.class, key));
         rv.setOnAction(event -> {
             options.edit().set(Boolean.class, key, rv.isSelected());
         });
         return rv;
+    }
+
+    @Override
+    public void updateValue(Node node, String key, Options options) {
+        ((CheckBox) node).setSelected(options.get(Boolean.class, key));
     }
 }

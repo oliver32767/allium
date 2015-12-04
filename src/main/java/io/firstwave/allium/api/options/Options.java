@@ -69,7 +69,7 @@ public final class Options {
         if (readOnly) {
             mEditor = new Editor() {
                 @Override
-                public void apply() {
+                public int apply() {
                     throw new UnsupportedOperationException();
                 }
             };
@@ -120,16 +120,24 @@ public final class Options {
         return mEditor;
     }
 
-    private void apply(Editor editor) {
+    public BooleanProperty unmodifiedProperty() {
+        return mUnmodified;
+    }
+
+    private int apply(Editor editor) {
         // this has all been validated
         if (editor.mChanges.size() == 0) {
-            Logger.trace("No changes applied");
-            return;
+            Logger.debug("No changes applied");
+            return 0;
         }
         mValues.putAll(editor.mChanges);
-        Logger.debug("Applied " + editor.mChanges.size() + " change(s)");
+
+        final int rv = editor.mChanges.size();
+
         editor.mChanges.clear();
         mUnmodified.setValue(true);
+        Logger.debug("Applied " + rv + " change(s)");
+        return rv;
     }
 
     public class Editor {
@@ -160,17 +168,28 @@ public final class Options {
                 return this;
             }
 
-            if (mValues.containsKey(key) && !opt.equals(mValues.get(key), value)) {
+            Logger.warn(mValues.get(key) + " -> " + value);
+
+            if (!mValues.containsKey(key) || !opt.equals(mValues.get(key), value)) {
+                Logger.debug("added " + key + " -> " + value + " to list of changes");
                 mChanges.put(key, value);
             } else {
+                Logger.debug("removed: " + key + " -> " + value + " from list of changes");
                 mChanges.remove(key);
             }
+
+
             mUnmodified.setValue(!mChanges.isEmpty());
             return this;
         }
 
-        public void apply() {
-            Options.this.apply(this);
+        public int apply() {
+            return Options.this.apply(this);
+        }
+
+        public void cancel() {
+            mChanges.clear();
+            mUnmodified.setValue(true);
         }
     }
 

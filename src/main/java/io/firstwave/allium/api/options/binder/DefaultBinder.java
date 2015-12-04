@@ -13,4 +13,10 @@ public class DefaultBinder implements OptionBinder {
     public Node bind(String key, Options options) {
         return new TextField("No binder for key: " + key + " (type: " + options.getOptionType(key) + ")");
     }
+
+    @Override
+    public void updateValue(Node node, String key, Options options) {
+
+    }
+
 }
