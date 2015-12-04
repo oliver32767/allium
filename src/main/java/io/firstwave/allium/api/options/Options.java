@@ -81,12 +81,16 @@ public final class Options {
         mValues = new HashMap<>(b.mValues);
     }
 
+    public Object getValue(String key) {
+        return mValues.get(key);
+    }
+
     @SuppressWarnings("unchecked")
-    public <T> T get(Class<T> type, String key) {
+    public <T> T getValue(Class<T> type, String key) {
         if (!validateType(type, key)) {
             return null;
         }
-        return (T) mValues.get(key);
+        return (T) getValue(key);
     }
 
     public Option<?> getOption(String key) {

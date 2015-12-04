@@ -26,8 +26,8 @@ public class OptionsTest {
 
     @Test
     public void testGet() throws Exception {
-        assertTrue(mOptions.get(Boolean.class, "boolean"));
-        assertEquals(7, (int) mOptions.get(Integer.class, "int"));
+        assertTrue(mOptions.getValue(Boolean.class, "boolean"));
+        assertEquals(7, (int) mOptions.getValue(Integer.class, "int"));
     }
 
     @Test
@@ -56,8 +56,8 @@ public class OptionsTest {
         mOptions.edit().set(Integer.class, "int", 4);
         mOptions.edit().apply();
 
-        assertFalse(mOptions.get(Boolean.class, "boolean"));
-        assertEquals(4, (int) mOptions.get(Integer.class, "int"));
+        assertFalse(mOptions.getValue(Boolean.class, "boolean"));
+        assertEquals(4, (int) mOptions.getValue(Integer.class, "int"));
 
     }
 }

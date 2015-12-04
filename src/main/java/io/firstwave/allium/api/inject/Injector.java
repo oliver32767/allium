@@ -1,7 +1,6 @@
 package io.firstwave.allium.api.inject;
 
 import io.firstwave.allium.api.Layer;
-import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.api.options.Options;
 import org.pmw.tinylog.Logger;
 
@@ -14,18 +13,8 @@ import java.util.Map;
  */
 public class Injector {
 
-    public static void inject(Layer layer) {
-        if (layer == null) {
-            throw new NullPointerException();
-        }
-        new Injector(layer, null, layer).inject(); // TODO: fix options support
-    }
-
-    public static void inject(Scene scene) {
-        if (scene == null) {
-            throw new NullPointerException();
-        }
-        new Injector(scene, null, scene.getRoot()).inject(); // TODO: fix options support
+    public static void inject(Object target, Layer source) {
+        new Injector(target, source.getOptions(), source).inject();
     }
 
     private final Object mTarget;
@@ -52,9 +41,49 @@ public class Injector {
     }
 
     private void inject(Field field, Inject anno) {
-        Logger.trace("Injecting " + field.toGenericString() + " using " + anno.key() + ":" + anno.type());
-        // TODO
+        try {
+            if (field != null) {
+                Logger.trace("Injecting " + field.toGenericString() + " using " + anno.key() + ":" + anno.type());
+                field.setAccessible(true);
+            } else {
+                return;
+            }
+            switch (anno.type()) {
+                case AUTO:
+                    if (field.getType().isAssignableFrom(Layer.class)) {
+                        injectLayer(field, anno);
+                    } else {
+                        injectOption(field, anno);
+                    }
+                    Logger.trace("Injected " + field.getName() + " -> " + field.get(mTarget));
+                    break;
+                case LAYER:
+                    injectLayer(field, anno);
+                    break;
+                case OPTION:
+                    injectOption(field, anno);
+            }
+        } catch (IllegalAccessException | ClassCastException e) {
+            Logger.warn(e, "Couldn't inject field:" + field.getName());
+        } catch (NullPointerException ignored) {
+
+        }
+
     }
 
+    private void injectLayer(Field field, Inject anno) throws IllegalAccessException {
+        if ("".equals(anno.key())) {
+            field.set(mTarget, mLayer.findChildByName(field.getName()));
+        } else {
+            field.set(mTarget, mLayer.findChildByName(anno.key()));
+        }
+    }
 
+    private void injectOption(Field field, Inject anno) throws IllegalAccessException {
+        if ("".equals(anno.key())) {
+            field.set(mTarget, mOptions.getValue(field.getName()));
+        } else {
+            field.set(mTarget, mOptions.getValue(anno.key()));
+        }
+    }
 }

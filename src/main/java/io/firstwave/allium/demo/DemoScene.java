@@ -5,6 +5,7 @@ import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.api.inject.FieldType;
 import io.firstwave.allium.api.inject.Inject;
+import io.firstwave.allium.api.inject.Injector;
 import io.firstwave.allium.api.options.BooleanOption;
 import io.firstwave.allium.api.options.Options;
 import javafx.scene.paint.Color;
@@ -16,7 +17,7 @@ import static io.firstwave.allium.demo.LayerUtils.gc;
  */
 public class DemoScene extends Scene {
 
-    @Inject
+    @Inject(key = "foo")
     Layer foo;
 
     @Inject(key = "bar")
@@ -26,6 +27,11 @@ public class DemoScene extends Scene {
     Layer spam;
 
     Layer eggs;
+
+    @Inject Layer trouble;
+
+    @Inject
+    private boolean Awesome;
 
     @Override
     protected Layer onCreate() {
@@ -40,8 +46,8 @@ public class DemoScene extends Scene {
                 .build()
         );
 
-        foo =root.addChild(new Layer("foo"));
-        bar =root.addChild(new Layer("bar"));
+        foo = root.addChild(new Layer("foo"));
+        bar = root.addChild(new Layer("bar"));
         spam = new Layer("spam");
         eggs = spam.addChild(new Layer("eggs"));
         eggs.addChild(new TroubleMaker());
@@ -50,18 +56,15 @@ public class DemoScene extends Scene {
         spam.addChild(new Layer());
         root.addChild(spam);
         root.addChild(new NoiseLayer());
+
+        Injector.inject(this, root);
+
         return root;
     }
 
 
     @Override
     protected void onRender(RenderContext ctx) {
-//        if (getOpt(getRoot(), "Option")) {
-//            gc(foo).setFill(Color.BLUE);
-//        } else {
-//            gc(foo).setFill(Color.PINK);
-//        }
-
         gc(foo).fillRect(750,750,1000,1000);
         foo.publish();
 

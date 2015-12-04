@@ -12,7 +12,7 @@ import java.util.UUID;
 public class TroubleMaker extends Layer {
 
     public TroubleMaker() {
-        super("\uD83D\uDCA9");
+        super("trouble");
         setMessage(UUID.randomUUID().toString());
     }
 

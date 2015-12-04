@@ -20,6 +20,6 @@ public class CheckBoxBinder implements OptionBinder {
 
     @Override
     public void updateValue(Node node, String key, Options options) {
-        ((CheckBox) node).setSelected(options.get(Boolean.class, key));
+        ((CheckBox) node).setSelected(options.getValue(Boolean.class, key));
     }
 }
