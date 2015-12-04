@@ -17,9 +17,6 @@ public abstract class Option<T> {
 
     public Option(Class<T> type, T defaultValue, String description) {
         mType = type;
-        if (type == null || !validate(defaultValue)) {
-            throw new IllegalArgumentException("Invalid default value for option:" + toString());
-        }
         mDefaultValue = defaultValue;
         mDescription = description;
     }
@@ -29,7 +26,7 @@ public abstract class Option<T> {
     }
 
     public boolean validate(Object value) {
-        return mType.isInstance(value);
+        return value != null && mType.isAssignableFrom(value.getClass());
     }
 
     public boolean equals(T oldValue, T newValue) {

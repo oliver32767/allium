@@ -48,7 +48,7 @@ public final class Options {
     public static final Options EMPTY = new Options();
 
     public static Options unmodifiableOptions(Options options) {
-        return new Options(options, true);
+        return new Options(options);
     }
 
     private final BooleanProperty mUnmodified = new SimpleBooleanProperty(false);
@@ -63,17 +63,19 @@ public final class Options {
         mValues = new HashMap<>();
     }
 
-    private Options(Options copy, boolean readOnly) {
+    private Options(Options copy) {
+        if (copy == null) {
+            copy = EMPTY;
+        }
         mItems = copy.mItems;
         mValues = copy.mValues;
-        if (readOnly) {
-            mEditor = new Editor() {
-                @Override
-                public int apply() {
-                    throw new UnsupportedOperationException();
-                }
-            };
-        }
+        mEditor = new Editor() {
+            @Override
+            public int apply() {
+                throw new UnsupportedOperationException();
+            }
+        };
+
     }
 
     private Options(Builder b) {
@@ -91,6 +93,13 @@ public final class Options {
             return null;
         }
         return (T) getValue(key);
+    }
+
+    public Class<?> getValueType(String key) {
+        if (!mItems.containsKey(key)) {
+            return null;
+        }
+        return mItems.get(key).getType();
     }
 
     public Option<?> getOption(String key) {
@@ -146,7 +155,8 @@ public final class Options {
 
     public class Editor {
 
-        private Editor() {}
+        private Editor() {
+        }
 
         private Map<String, Object> mChanges = new HashMap<>();
 
@@ -171,8 +181,6 @@ public final class Options {
                 Logger.warn("Value <" + value + "> is invalid for key " + key);
                 return this;
             }
-
-            Logger.warn(mValues.get(key) + " -> " + value);
 
             if (!mValues.containsKey(key) || !opt.equals(mValues.get(key), value)) {
                 Logger.debug("added " + key + " -> " + value + " to list of changes");

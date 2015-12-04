@@ -1,11 +1,15 @@
 package io.firstwave.allium.viewer;
 
 import io.firstwave.allium.api.options.BooleanOption;
+import io.firstwave.allium.api.options.FloatOption;
+import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.api.options.binder.CheckBoxBinder;
 import io.firstwave.allium.api.options.binder.OptionBinder;
+import io.firstwave.allium.api.options.binder.SliderBinder;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import org.pmw.tinylog.Logger;
 
@@ -20,7 +24,11 @@ import java.util.Map;
 public class OptionsController {
 
     public static void registerDefaultBinders() {
+
         Options.registerBinder(BooleanOption.class, new CheckBoxBinder());
+        final SliderBinder sb = new SliderBinder();
+        Options.registerBinder(IntegerOption.class, sb);
+        Options.registerBinder(FloatOption.class, sb);
     }
 
     private final List<Node> mChildList;
@@ -49,8 +57,17 @@ public class OptionsController {
         }
 
         for (String key : newValue.getKeys()) {
-            final Node node = getNodeForOption(key, newValue);
-            if (node != null) {
+            if (newValue.getOption(key) != null) {
+                Node node;
+                try {
+                    node = getNodeForOption(key, newValue);
+                    if (node == null) {
+                        node = Options.getBinder(null).bind(key, newValue);
+                    }
+                } catch (Throwable tr) {
+                    Logger.warn(tr);
+                    node = new Label("Error binding: " + key);
+                }
                 mNodeMap.put(key, node);
                 mChildList.add(node);
             }
@@ -61,7 +78,11 @@ public class OptionsController {
     private Node getNodeForOption(String key, Options opts) {
         try {
             final OptionBinder binder = getBinderForOption(key, opts);
-            return binder.bind(key, mOptions.getValue());
+            final Node rv = binder.bind(key, mOptions.getValue());
+            if (rv == null) {
+                Logger.warn("Binder " + binder + " could not bind option:" + key);
+            }
+            return rv;
         } catch (Throwable e) {
             Logger.warn(e);
             return null;
@@ -82,14 +103,18 @@ public class OptionsController {
         }
 
         for (String key : mNodeMap.keySet()) {
-            reset(key, mNodeMap.get(key), opts);
+            reset(key, mNodeMap.get(key), Options.unmodifiableOptions(opts));
         }
     }
 
     private void reset(String key, Node node, Options opts) {
         if (node != null && opts != null) {
             final OptionBinder b = getBinderForOption(key, opts);
-            b.updateValue(node, key, opts);
+            try {
+                b.updateValue(node, key, opts);
+            } catch (Throwable tr) {
+                Logger.warn(tr);
+            }
         }
     }
 
@@ -99,6 +124,5 @@ public class OptionsController {
             return 0;
         }
         return opts.edit().apply();
-
     }
 }

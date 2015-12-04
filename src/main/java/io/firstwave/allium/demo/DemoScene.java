@@ -7,6 +7,8 @@ import io.firstwave.allium.api.inject.FieldType;
 import io.firstwave.allium.api.inject.Inject;
 import io.firstwave.allium.api.inject.Injector;
 import io.firstwave.allium.api.options.BooleanOption;
+import io.firstwave.allium.api.options.FloatOption;
+import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
 import javafx.scene.paint.Color;
 
@@ -31,6 +33,9 @@ public class DemoScene extends Scene {
     @Inject Layer trouble;
 
     @Inject
+    private float floaty;
+
+    @Inject
     private boolean Awesome;
 
     @Override
@@ -43,6 +48,8 @@ public class DemoScene extends Scene {
 
         root.setOptions(new Options.Builder()
                 .add("Awesome", new BooleanOption(true))
+                .add("IntegerOpt", new IntegerOption(7, 0, 255))
+                .add("floaty", new FloatOption(0.5f))
                 .build()
         );
 

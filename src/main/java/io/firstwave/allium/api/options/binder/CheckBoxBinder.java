@@ -11,10 +11,11 @@ public class CheckBoxBinder implements OptionBinder {
 
     @Override
     public Node bind(final String key, final Options options) {
+        if (options.getOption(key) == null || options.getOption(key).getType() != Boolean.class) {
+            return null;
+        }
         final CheckBox rv = new CheckBox(key);
-        rv.setOnAction(event -> {
-            options.edit().set(Boolean.class, key, rv.isSelected());
-        });
+        rv.setOnAction(event -> options.edit().set(Boolean.class, key, rv.isSelected()));
         return rv;
     }
 
