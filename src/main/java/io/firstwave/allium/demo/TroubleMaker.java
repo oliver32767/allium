@@ -4,7 +4,8 @@ import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import javafx.scene.canvas.Canvas;
 
-import java.util.UUID;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Created by obartley on 12/2/15.
@@ -13,7 +14,12 @@ public class TroubleMaker extends Layer {
 
     public TroubleMaker() {
         super("trouble");
-        setMessage(UUID.randomUUID().toString());
+
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
+        final RuntimeException re = new RuntimeException();
+        re.printStackTrace(pw);
+        setMessage(sw.toString());
     }
 
     @Override

@@ -105,7 +105,6 @@
                                       <columns>
                                         <TreeTableColumn fx:id="nodeName" editable="false" prefWidth="213.0" sortable="false" text="Layers" />
                                         <TreeTableColumn fx:id="nodeVisible" minWidth="0.0" prefWidth="33.0" resizable="false" sortable="false" />
-                                          <TreeTableColumn fx:id="nodeState" editable="false" minWidth="0.0" prefWidth="33.0" resizable="false" />
                                           <TreeTableColumn fx:id="nodeMessage" editable="false" prefWidth="75.0" />
                                       </columns>
                                     </TreeTableView>

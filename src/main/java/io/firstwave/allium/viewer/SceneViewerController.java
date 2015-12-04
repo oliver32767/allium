@@ -2,12 +2,12 @@ package io.firstwave.allium.viewer;
 
 import io.firstwave.allium.Const;
 import io.firstwave.allium.api.Layer;
-import io.firstwave.allium.api.LayerState;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.demo.DemoScene;
 import io.firstwave.allium.utils.FXUtils;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -21,8 +21,11 @@ import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.pmw.tinylog.Logger;
 
 import java.net.URL;
@@ -79,11 +82,9 @@ public class SceneViewerController implements Initializable {
     @FXML
     private TreeTableView<Layer> sceneTree;
     @FXML
-    private TreeTableColumn<Layer, String> nodeName;
+    private TreeTableColumn<Layer, Layer> nodeName;
     @FXML
     private TreeTableColumn<Layer, Boolean> nodeVisible;
-    @FXML
-    private TreeTableColumn<Layer, LayerState> nodeState;
     @FXML
     private TreeTableColumn<Layer, String> nodeMessage;
 
@@ -96,7 +97,52 @@ public class SceneViewerController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        nodeName.setCellValueFactory(param -> param.getValue().getValue().nameProperty());
+        nodeName.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
+        nodeName.setCellFactory(new Callback<TreeTableColumn<Layer, Layer>, TreeTableCell<Layer, Layer>>() {
+            @Override
+            public TreeTableCell<Layer, Layer> call(TreeTableColumn<Layer, Layer> param) {
+                return new TextFieldTreeTableCell<Layer, Layer>() {
+                    @Override
+                    public void updateItem(final Layer item, boolean empty) {
+                        if (item == null) {
+                            return;
+                        }
+                        setText(item.getName());
+                        final TextFieldTreeTableCell cell = this;
+                        item.stateProperty().addListener((observable, oldValue, newValue) -> {
+                            updateItemBadge(cell, item);
+                        });
+                        updateItemBadge(this, item);
+                    }
+                };
+
+            }
+            private void updateItemBadge(TextFieldTreeTableCell cell, Layer item) {
+                Color c;
+                switch (item.stateProperty().getValue()) {
+                    case RENDERING:
+                        c = Color.YELLOW;
+                        break;
+                    case PUBLISHED:
+                        c = Color.GREEN;
+                        break;
+                    case ERROR:
+                        c = Color.RED;
+                        break;
+                    case IDLE:
+                    default:
+                        c = Color.GRAY;
+                }
+                if (cell.getGraphic() == null) {
+                    final Circle circ = new Circle(2);
+                    circ.setStrokeWidth(1);
+                    circ.setStrokeType(StrokeType.OUTSIDE);
+                    cell.setGraphic(circ);
+                }
+                ((Circle) cell.getGraphic()).setFill(c);
+                ((Circle) cell.getGraphic()).setStroke(c.brighter());
+            }
+        });
         nodeVisible.setCellValueFactory(param -> param.getValue().getValue().visibleProperty());
         nodeVisible.setCellFactory(param -> {
             final CheckBoxTreeTableCell<Layer, Boolean> rv =
@@ -105,45 +151,26 @@ public class SceneViewerController implements Initializable {
             return rv;
         });
 
-        nodeState.setCellValueFactory(param -> param.getValue().getValue().stateProperty());
-        nodeState.setCellFactory(param -> {
-            final TextFieldTreeTableCell rv =
-                    new TextFieldTreeTableCell<Layer, LayerState>() {
-                @Override
-                public void updateItem(LayerState item, boolean empty) {
-                    if (item == null) {
-                        setText(null);
-                        return;
-                    }
-                    switch (item) {
-                        case IDLE:
-                            setText(null);
-                            break;
-                        case RENDERING:
-                            setText("…");
-                            break;
-                        case PUBLISHED:
-                            setText("✓");
-                            break;
-                        case ERROR:
-                            setText("⚠");
-                    }
-                }
-            };
-            rv.setAlignment(Pos.CENTER);
-            return rv;
-        });
         nodeMessage.setCellValueFactory(param -> param.getValue().getValue().messageProperty());
         nodeMessage.setCellFactory(param -> {
             final TextFieldTreeTableCell<Layer, String> rv = new TextFieldTreeTableCell<Layer, String>() {
                 @Override
                 public void updateItem(String item, boolean empty) {
-                    setText(item);
+                    setWrapText(false);
+                    setText(null);
                     if (item == null) {
                         Tooltip.install(this, null);
                         return;
                     }
-                    Tooltip.install(this, new Tooltip(item));
+                    String[] split = item.split(System.getProperty("line.separator"));
+                    if (split.length > 0) {
+                        setText(split[0]);
+                    } else {
+                        setText(item);
+                    }
+                    Tooltip tt = new Tooltip(item);
+                    tt.setWrapText(true);
+                    Tooltip.install(this, tt);
                 }
             };
             rv.setOpacity(0.5);
