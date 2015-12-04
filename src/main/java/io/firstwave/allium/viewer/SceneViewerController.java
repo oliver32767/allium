@@ -7,6 +7,7 @@ import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.demo.DemoScene;
 import io.firstwave.allium.utils.FXUtils;
+import io.firstwave.allium.viewer.ui.LayerNameTreeTableCell;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -22,11 +23,8 @@ import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.pmw.tinylog.Logger;
 
 import java.net.URL;
@@ -101,54 +99,8 @@ public class SceneViewerController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
 
         nodeName.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
-        nodeName.setCellFactory(new Callback<TreeTableColumn<Layer, Layer>, TreeTableCell<Layer, Layer>>() {
-            @Override
-            public TreeTableCell<Layer, Layer> call(TreeTableColumn<Layer, Layer> param) {
-                return new TextFieldTreeTableCell<Layer, Layer>() {
-                    @Override
-                    public void updateItem(final Layer item, boolean empty) {
-                        if (item == null) {
-                            return;
-                        }
-                        setText(item.getName());
-                        final TextFieldTreeTableCell cell = this;
-                        // TODO: I think the item badges are beign updated out of sync. We might need to unregister
-                        // an update listener
-                        item.stateProperty().addListener((observable, oldValue, newValue) -> {
-                            updateItemBadge(cell, item);
-                        });
-                        updateItemBadge(this, item);
-                    }
-                };
 
-            }
-
-            private void updateItemBadge(TextFieldTreeTableCell cell, Layer item) {
-                Color c;
-                switch (item.stateProperty().getValue()) {
-                    case RENDERING:
-                        c = Color.YELLOW;
-                        break;
-                    case PUBLISHED:
-                        c = Color.GREEN;
-                        break;
-                    case ERROR:
-                        c = Color.RED;
-                        break;
-                    case IDLE:
-                    default:
-                        c = Color.GRAY;
-                }
-                if (cell.getGraphic() == null) {
-                    final Circle circ = new Circle(2);
-                    circ.setStrokeWidth(1);
-                    circ.setStrokeType(StrokeType.OUTSIDE);
-                    cell.setGraphic(circ);
-                }
-                ((Circle) cell.getGraphic()).setFill(c);
-                ((Circle) cell.getGraphic()).setStroke(c.brighter());
-            }
-        });
+        nodeName.setCellFactory(LayerNameTreeTableCell.getFactory());
         nodeVisible.setCellValueFactory(param -> param.getValue().getValue().visibleProperty());
         nodeVisible.setCellFactory(param -> {
             final CheckBoxTreeTableCell<Layer, Boolean> rv =

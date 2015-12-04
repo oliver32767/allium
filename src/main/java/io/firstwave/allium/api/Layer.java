@@ -220,7 +220,7 @@ public class Layer {
 
     final void preRender(RenderContext ctx) {
         ThreadEnforcer.MAIN.enforce();
-        mState.setValue(LayerState.RENDERING);
+        mState.setValue(LayerState.IDLE);
         mRenderContext = ctx;
         try {
             mCanvas = onCreateCanvas(ctx);
@@ -244,7 +244,8 @@ public class Layer {
 
     final void render(RenderContext ctx) {
         ThreadEnforcer.BACKGROUND.enforce();
-        if (mState.getValue() == LayerState.RENDERING) {
+        if (mState.getValue() == LayerState.IDLE) {
+            mState.setValue(LayerState.RENDERING);
             try {
                 onRender(ctx);
             } catch (Throwable tr) {
