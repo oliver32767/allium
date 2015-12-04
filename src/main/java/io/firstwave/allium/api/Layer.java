@@ -230,6 +230,7 @@ public class Layer {
             mCanvas = null;
             mState.setValue(LayerState.ERROR);
         }
+        ctx.onPreRenderComplete(this);
     }
 
     protected Canvas onCreateCanvas(RenderContext ctx) {

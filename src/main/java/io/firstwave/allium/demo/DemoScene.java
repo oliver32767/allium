@@ -63,7 +63,7 @@ public class DemoScene extends Scene {
         spam.addChild(new Layer());
 
         Layer bbhh = new Layer();
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 10; i++) {
             bbhh.addChild(new RectLayer());
         }
 

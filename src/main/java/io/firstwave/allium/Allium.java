@@ -6,8 +6,10 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
 
@@ -25,7 +27,21 @@ public class Allium extends Application {
         controller.setStage(primaryStage);
         primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.setOnCloseRequest(event -> Platform.exit());
+        primaryStage.getIcons().addAll(new Image("/images/icon_512.png"));
+
+
+        configureStageForOSX(primaryStage);
+
         primaryStage.show();
+    }
+
+    private void configureStageForOSX(Stage stage) {
+        try {
+            java.awt.Image image = ImageIO.read(getClass().getResourceAsStream("/images/icon_512.png"));
+            com.apple.eawt.Application.getApplication().setDockIconImage(image);
+        } catch (Exception e) {
+            // Won't work on Windows or Linux.
+        }
     }
 
     private ResourceBundle getResourceBundle() {

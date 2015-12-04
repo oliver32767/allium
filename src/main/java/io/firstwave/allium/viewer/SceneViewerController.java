@@ -20,6 +20,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -70,7 +71,7 @@ public class SceneViewerController implements Initializable {
     private Color x4;
 
     @FXML
-    private Label statusLeft;
+    private Label statusMessage;
 
     @FXML
     private StackPane layerStack;
@@ -86,6 +87,11 @@ public class SceneViewerController implements Initializable {
     private TreeTableColumn<Layer, Boolean> nodeVisible;
     @FXML
     private TreeTableColumn<Layer, String> nodeMessage;
+
+    @FXML
+    private TextArea textLog;
+    @FXML
+    private ProgressBar progress;
 
 
     private OptionsController mOptionsController;
@@ -177,6 +183,10 @@ public class SceneViewerController implements Initializable {
 
         menuAbout.setOnAction(event -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            ImageView icon = new ImageView("/images/icon_512.png");
+            icon.setFitHeight(64);
+            icon.setFitWidth(64);
+            alert.setGraphic(icon);
             alert.setTitle("About");
             alert.setHeaderText(Const.APP_NAME + " (" + Const.VERSION + ")");
             alert.setContentText(Const.COPYRIGHT);
@@ -257,9 +267,10 @@ public class SceneViewerController implements Initializable {
             mScene.backgroundColorProperty().addListener((observable, oldValue, newValue) -> {
                 setBackgroundColor(newValue);
             });
-            mScene.renderingProperty().addListener((observable, oldValue, newValue) -> {
+            mScene.renderContextProperty().addListener((observable, oldValue, newValue) -> {
                 Logger.debug("Rendering lock:" + newValue);
-                mLocked.set(newValue);
+                mLocked.set(newValue != null);
+                progress.setProgress(0);
             });
         }
         updateOptionsList(null);
@@ -275,7 +286,7 @@ public class SceneViewerController implements Initializable {
         }
 
         final TreeItem<Layer> root = new TreeItem<>(scene.getRoot());
-        Logger.error("adding root node:" + scene.getRoot().getName());
+
         sceneTree.setRoot(root);
 
         if (sceneTree.getSelectionModel().selectedItemProperty().getValue() != null) {
@@ -325,20 +336,27 @@ public class SceneViewerController implements Initializable {
         mOptionsController.apply();
         layerStack.getChildren().clear();
 
-        final RenderContext ctx = new RenderContext(mScene.getWidth(), mScene.getHeight(),
-                layer -> {
+        final RenderContext context = new RenderContext(mScene.getWidth(), mScene.getHeight(),
+                (ctx, layer) -> {
                     // called on the render thread, we need to push it back to the main thread
                     if (layer != null) {
                         final Canvas canvas = layer.getCanvas();
                         if (canvas != null) {
                             Logger.trace("publishing:" + layer);
-                            FXUtils.runOnMainThread(() -> SceneViewerController.this.publish(layer, canvas));
+                            FXUtils.runOnMainThread(() -> {
+                                SceneViewerController.this.publish(layer, canvas);
+                                final double total = ctx.getLayerCount();
+                                final double count = ctx.getPublishCount();
+                                progress.setProgress(count / total);
+                            });
                         }
                     }
                 },
-                (source, message) -> Logger.info(source + ": " + message));
+                (ctx, source, message) -> setStatus("[" + source + "] " + message),
+                (ctx, source, tr) -> setStatus("[" + source + "] " + tr.toString()));
 
-        mScene.render(ctx);
+        mScene.render(context);
+
     }
 
     private void publish(Layer layer, Canvas canvas) {
@@ -361,7 +379,10 @@ public class SceneViewerController implements Initializable {
 
     private void setStatus(final String status) {
         Logger.info(status);
-        FXUtils.runOnMainThread(() -> statusLeft.setText(status));
+        FXUtils.runOnMainThread(() -> {
+            statusMessage.setText(status);
+            textLog.appendText(status + "\n");
+        });
     }
 
     private void updateOptionsList(Options options) {

@@ -1,7 +1,6 @@
 package io.firstwave.allium.api;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -22,9 +21,8 @@ public abstract class Scene {
     private double mHeight = 0;
     private SimpleObjectProperty<Color> mBackgroundColor = new SimpleObjectProperty<>(Color.TRANSPARENT);
 
-    private final SimpleBooleanProperty mIsRendering = new SimpleBooleanProperty(false);
+    private SimpleObjectProperty<RenderContext> mRenderContext = new SimpleObjectProperty<>();
 
-    
     public final Layer getRoot() {
         return mRoot;
     }
@@ -63,17 +61,15 @@ public abstract class Scene {
     
     protected abstract Layer onCreate();
 
-    public BooleanProperty renderingProperty() {
-        return mIsRendering;
-    }
-
+    /**
+     * Scenes should not call this method directly, the viewer will handle this one dude
+     */
     public final void render(final RenderContext ctx) {
-        if (mIsRendering.getValue()) {
+        if (mRenderContext.getValue() != null) {
             Logger.debug("Render in progress -- skipping");
             return;
         }
-
-        mIsRendering.setValue(true);
+        mRenderContext.setValue(ctx);
 
         final long startTime = System.currentTimeMillis();
 
@@ -83,7 +79,7 @@ public abstract class Scene {
             mRoot.each(layer -> layer.preRender(ctx));
         }
 
-        ctx.handleMessage(this, "Starting rendering");
+        ctx.handleMessage("START", "Starting render with " + ctx);
         final Task<Void> renderTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
@@ -92,34 +88,36 @@ public abstract class Scene {
                     mRoot.each(layer -> layer.render(ctx));
                     mRoot.each(Layer::publish);
                 }
-
-                final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
-                ctx.handleMessage(this, String.format("Rendered in %.4f second(s)", elapsed));
                 return null;
             }
 
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
             @Override
             protected void failed() {
-                mIsRendering.setValue(false);
+                mRenderContext.setValue(null);
                 final Throwable tr = getException();
                 final StringWriter sw = new StringWriter();
                 final PrintWriter pw = new PrintWriter(sw);
                 Logger.warn(tr);
                 tr.printStackTrace(pw);
-                ctx.handleMessage(this, tr.getMessage());
-                ctx.handleMessage(this, sw.toString());
+                ctx.handleMessage("FAIL", "Rendering could not be completed: " + tr + "\n");
             }
 
             @Override
             protected void succeeded() {
-                mIsRendering.setValue(false);
+                mRenderContext.setValue(null);
+                final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
+                ctx.handleMessage("FINISH", String.format("Rendered %d/%d layer(s) in %.4f second(s)\n", ctx.getLayerCount(), ctx.getPublishCount(), elapsed));
             }
         };
 
         Thread th = new Thread(renderTask);
         th.setDaemon(true);
         th.start();
+    }
+
+    public final ObjectProperty<RenderContext> renderContextProperty() {
+        return mRenderContext;
     }
 
     protected void onPreRender(RenderContext ctx) {
@@ -129,4 +127,6 @@ public abstract class Scene {
     protected void onRender(RenderContext ctx) {
 
     }
+
+
 }

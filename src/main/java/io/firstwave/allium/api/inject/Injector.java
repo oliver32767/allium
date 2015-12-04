@@ -65,7 +65,7 @@ public class Injector {
                     injectOption(field, anno);
             }
         } catch (IllegalAccessException | ClassCastException | IllegalArgumentException e) {
-            Logger.warn(e, "Couldn't inject field:" + field.getName());
+            Logger.warn("Couldn't inject field:" + field.getName() + " " + e.getMessage());
         } catch (NullPointerException ignored) {
 
         }

@@ -28,6 +28,6 @@ public class TroubleMaker extends Layer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        throw new RuntimeException("onRender");
+        throw new RuntimeException();
     }
 }
