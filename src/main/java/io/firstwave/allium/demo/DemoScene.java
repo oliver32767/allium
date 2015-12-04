@@ -6,10 +6,7 @@ import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.api.inject.FieldType;
 import io.firstwave.allium.api.inject.Inject;
 import io.firstwave.allium.api.inject.Injector;
-import io.firstwave.allium.api.options.BooleanOption;
-import io.firstwave.allium.api.options.FloatOption;
-import io.firstwave.allium.api.options.IntegerOption;
-import io.firstwave.allium.api.options.Options;
+import io.firstwave.allium.api.layer.GridLayer;
 import javafx.scene.paint.Color;
 
 import static io.firstwave.allium.demo.LayerUtils.gc;
@@ -40,28 +37,40 @@ public class DemoScene extends Scene {
 
     @Override
     protected Layer onCreate() {
-        final Layer root = new Layer();
+        final Layer root = new GridLayer();
 
         setBackgroundColor(Color.BLACK);
         setWidth(1024);
         setHeight(1024);
 
-        root.setOptions(new Options.Builder()
-                .add("Awesome", new BooleanOption(true))
-                .add("IntegerOpt", new IntegerOption(7, 0, 255))
-                .add("floaty", new FloatOption(0.5f))
-                .build()
-        );
-
         foo = root.addChild(new Layer("foo"));
+        foo.addChild(new RectLayer());
+        foo.addChild(new RectLayer());
         bar = root.addChild(new Layer("bar"));
         spam = new Layer("spam");
         eggs = spam.addChild(new Layer("eggs"));
         eggs.addChild(new TroubleMaker());
+        eggs.addChild(new RectLayer());
+        eggs.addChild(new RectLayer());
+        eggs.addChild(new RectLayer());
+        eggs.addChild(new RectLayer());
+        eggs.addChild(new RectLayer());
+        spam.addChild(new RectLayer());
+        spam.addChild(new RectLayer());
+        spam.addChild(new RectLayer());
         spam.addChild(new Layer());
         spam.addChild(new Layer());
         spam.addChild(new Layer());
+
+        Layer bbhh = new Layer();
+        for (int i = 0; i < 60; i++) {
+            bbhh.addChild(new RectLayer());
+        }
+
+        spam.addChild(bbhh);
+
         root.addChild(spam);
+        root.addChild(new RectLayer());
         root.addChild(new NoiseLayer());
 
         Injector.inject(this, root);

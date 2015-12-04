@@ -21,6 +21,7 @@ public class Injector {
     private final Options mOptions;
     private final Layer mLayer;
 
+    // TODO: add FieldType param to force a specific type of injection
     private Injector(Object target, Options options, Layer layer) {
         mTarget = target;
         mOptions = options;
@@ -63,7 +64,7 @@ public class Injector {
                 case OPTION:
                     injectOption(field, anno);
             }
-        } catch (IllegalAccessException | ClassCastException e) {
+        } catch (IllegalAccessException | ClassCastException | IllegalArgumentException e) {
             Logger.warn(e, "Couldn't inject field:" + field.getName());
         } catch (NullPointerException ignored) {
 

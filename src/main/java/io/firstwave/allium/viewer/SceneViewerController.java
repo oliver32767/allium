@@ -112,6 +112,8 @@ public class SceneViewerController implements Initializable {
                         }
                         setText(item.getName());
                         final TextFieldTreeTableCell cell = this;
+                        // TODO: I think the item badges are beign updated out of sync. We might need to unregister
+                        // an update listener
                         item.stateProperty().addListener((observable, oldValue, newValue) -> {
                             updateItemBadge(cell, item);
                         });
@@ -120,6 +122,7 @@ public class SceneViewerController implements Initializable {
                 };
 
             }
+
             private void updateItemBadge(TextFieldTreeTableCell cell, Layer item) {
                 Color c;
                 switch (item.stateProperty().getValue()) {
@@ -192,9 +195,10 @@ public class SceneViewerController implements Initializable {
         sceneReload.setOnAction(event -> reload());
 
         menuRender.disableProperty().bind(mLocked);
-        menuZoomIn.disableProperty().bind(mLocked);
-        menuZoomOut.disableProperty().bind(mLocked);
-        menuNoZoom.disableProperty().bind(mLocked);
+
+//        menuZoomIn.disableProperty().bind(mLocked);
+//        menuZoomOut.disableProperty().bind(mLocked);
+//        menuNoZoom.disableProperty().bind(mLocked);
 
         final EventHandler<ActionEvent> zoom = event -> {
             final MenuItem mnu = (MenuItem) event.getSource();
@@ -235,7 +239,6 @@ public class SceneViewerController implements Initializable {
 
         configApply.disableProperty().bind(mLocked);
         configApply.setOnAction(event1 -> {
-                    mOptionsController.apply();
                     render();
                 }
         );
@@ -303,7 +306,7 @@ public class SceneViewerController implements Initializable {
                 setBackgroundColor(newValue);
             });
             mScene.renderingProperty().addListener((observable, oldValue, newValue) -> {
-                Logger.warn("Rendering lock:" + newValue);
+                Logger.debug("Rendering lock:" + newValue);
                 mLocked.set(newValue);
             });
         }
@@ -367,7 +370,7 @@ public class SceneViewerController implements Initializable {
             Logger.debug("Skipping render");
             return;
         }
-
+        mOptionsController.apply();
         layerStack.getChildren().clear();
 
         final RenderContext ctx = new RenderContext(mScene.getWidth(), mScene.getHeight(),
