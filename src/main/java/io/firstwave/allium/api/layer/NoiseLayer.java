@@ -7,8 +7,8 @@ import io.firstwave.allium.api.options.BooleanOption;
 import io.firstwave.allium.api.options.FloatOption;
 import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
-import io.firstwave.allium.gen.NoiseGenerator;
-import io.firstwave.allium.gen.SimplexNoiseGenerator;
+import io.firstwave.allium.gen.noise.NoiseGenerator;
+import io.firstwave.allium.gen.noise.SimplexNoiseGenerator;
 import javafx.scene.paint.Color;
 
 

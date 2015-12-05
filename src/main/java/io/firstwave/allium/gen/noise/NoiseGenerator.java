@@ -1,4 +1,4 @@
-package io.firstwave.allium.gen;
+package io.firstwave.allium.gen.noise;
 
 /**
  * Base class for all noise generators
