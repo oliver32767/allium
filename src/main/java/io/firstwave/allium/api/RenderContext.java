@@ -6,6 +6,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import org.pmw.tinylog.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by obartley on 12/1/15.
  */
@@ -24,6 +27,8 @@ public final class RenderContext {
     private final IntegerProperty mPublishCount = new SimpleIntegerProperty(0);
     private final SimpleBooleanProperty mIsActive = new SimpleBooleanProperty(false);
 
+    private final Map<String, Object> mResources = new HashMap<>();
+
 
     public RenderContext(long seed, double width, double height, Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
         this.seed = seed;
@@ -35,14 +40,14 @@ public final class RenderContext {
     }
 
 
-    final void publish(Layer layer) {
+    void publish(Layer layer) {
         if (mPublisher != null) {
             mPublisher.publish(this, layer);
         }
         mPublishCount.setValue(mPublishCount.getValue() + 1);
     }
 
-    public final void handleMessage(Object source, String message) {
+    public void handleMessage(Object source, String message) {
         if (mMessageHandler != null) {
             mMessageHandler.log(this, source, message);
         } else {
@@ -50,7 +55,7 @@ public final class RenderContext {
         }
     }
 
-    final void handleException(Object source, Throwable exception) {
+    void handleException(Object source, Throwable exception) {
         Logger.error(exception);
         if (mExceptionHandler != null) {
             mExceptionHandler.handle(this, source, exception);
@@ -60,23 +65,23 @@ public final class RenderContext {
         }
     }
 
-    final void onPreRenderComplete(Layer layer) {
+    void onPreRenderComplete(Layer layer) {
         mLayerCount.setValue(mLayerCount.getValue() + 1);
     }
 
-    public final int getLayerCount() {
+    public int getLayerCount() {
         return mLayerCount.getValue();
     }
 
-    public final IntegerProperty layerCountProperty() {
+    public IntegerProperty layerCountProperty() {
         return mLayerCount;
     }
 
-    public final int getPublishCount() {
+    public int getPublishCount() {
         return mPublishCount.getValue();
     }
 
-    public final IntegerProperty publishCountProperty() {
+    public IntegerProperty publishCountProperty() {
         return mPublishCount;
     }
 
@@ -84,13 +89,21 @@ public final class RenderContext {
         mIsActive.setValue(active);
     }
 
-    public final BooleanProperty activeProperty() {
+    public BooleanProperty activeProperty() {
         return mIsActive;
     }
 
     @Override
     public String toString() {
         return RenderContext.class.getSimpleName() + " [" + width + " x " + height + " : " + seed + "]";
+    }
+
+    public void putResource(String key, Object value) {
+        mResources.put(key, value);
+    }
+
+    public Object getResource(String key) {
+        return mResources.get(key);
     }
 
     public interface Publisher {

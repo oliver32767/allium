@@ -152,6 +152,7 @@
                                                 <Tooltip text="Leave blank for a random seed" />
                                              </tooltip>
                                           </TextField>
+                                          <Separator orientation="VERTICAL" />
                                                         <Button fx:id="configDiscard" mnemonicParsing="false" text="Discard" />
                                                         <Button fx:id="configApply" mnemonicParsing="false" text="Apply" />
                                                     </items>
