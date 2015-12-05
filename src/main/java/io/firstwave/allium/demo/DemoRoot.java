@@ -29,8 +29,6 @@ public class DemoRoot extends Layer {
 
     Layer eggs;
 
-    @Inject Layer trouble;
-
     @Inject AnnotationLayer anno;
 
     @Inject
@@ -52,7 +50,7 @@ public class DemoRoot extends Layer {
         bar = root.addChild(new Layer("bar"));
         spam = new Layer("spam");
         eggs = new Layer("eggs");
-        eggs.addChild(new TroubleMaker());
+        eggs.addChild(new TroubleMaker(0));
         root.addChild(eggs);
 
 
@@ -66,6 +64,13 @@ public class DemoRoot extends Layer {
         anno = new AnnotationLayer("anno");
 
         anno.addAnnotation(new AnnotationLayer.Annotation("Hello.", 512, 512));
+        anno.addAnnotation(
+                new AnnotationLayer.Annotation("No, over there", 512, 512)
+                        .setOffset(-100, 100)
+                        .setScale(0.5)
+                        .setColor(Color.PINK)
+
+        );
 
         root.addChild(anno);
 

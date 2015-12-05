@@ -6,6 +6,7 @@ import io.firstwave.allium.api.inject.FieldType;
 import io.firstwave.allium.api.inject.Inject;
 import io.firstwave.allium.api.options.BooleanOption;
 import io.firstwave.allium.api.options.FloatOption;
+import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.Color;
@@ -23,14 +24,12 @@ public class TroubleMaker extends Layer {
     @Inject(type = FieldType.OPTION)
     private final Layer derpderpderp = null;
 
-    @Inject(key = "derpep")
-    private Byte blurp;
+    @Inject()
+    private long delay;
 
 
 
-    public TroubleMaker() {
-        super("trouble");
-
+    public TroubleMaker(int delay) {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
         final RuntimeException re = new RuntimeException();
@@ -38,6 +37,7 @@ public class TroubleMaker extends Layer {
         setMessage(sw.toString());
 
         setOptions(Options.create()
+                .add("delay", new IntegerOption(delay, 0, 60000))
                 .add("\n", new BooleanOption(true))
                 .add("\t⚙", new FloatOption(0.0f, -Float.MAX_VALUE, Float.MAX_VALUE))
                 .build()
@@ -52,7 +52,7 @@ public class TroubleMaker extends Layer {
     @Override
     protected void onRender(RenderContext ctx) {
         try {
-            Thread.sleep(5000);
+            Thread.sleep(delay);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
