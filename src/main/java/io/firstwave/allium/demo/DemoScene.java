@@ -33,11 +33,13 @@ public class DemoScene extends Scene {
 
     @Inject AnnotationLayer anno;
 
+    @Inject Color backgroundColor;
+
+
     @Override
     protected Layer onCreate() {
         final Layer root = new GridLayer();
 
-        setBackgroundColor(Color.BLACK);
         setWidth(1024);
         setHeight(1024);
 
@@ -61,19 +63,26 @@ public class DemoScene extends Scene {
 
         anno = new AnnotationLayer("anno");
 
-        anno.addAnnotation(new AnnotationLayer.Annotation("DERP", 512, 512));
+        anno.addAnnotation(new AnnotationLayer.Annotation("Hello.", 512, 512));
 
         root.addChild(anno);
 
 
-        Injector.inject(this, root);
+
 
         return root;
     }
 
+    @Override
+    protected void onPreRender(RenderContext ctx) {
+        super.onPreRender(ctx);
+        Injector.inject(this, getRoot());
+    }
 
     @Override
     protected void onRender(RenderContext ctx) {
+        setBackgroundColor(Color.BLACK);
+
         gc(foo).fillRect(750,750,1000,1000);
         foo.publish();
 

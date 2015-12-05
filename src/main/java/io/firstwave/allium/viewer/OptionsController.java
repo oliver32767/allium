@@ -1,10 +1,8 @@
 package io.firstwave.allium.viewer;
 
-import io.firstwave.allium.api.options.BooleanOption;
-import io.firstwave.allium.api.options.FloatOption;
-import io.firstwave.allium.api.options.IntegerOption;
-import io.firstwave.allium.api.options.Options;
+import io.firstwave.allium.api.options.*;
 import io.firstwave.allium.api.options.binder.CheckBoxBinder;
+import io.firstwave.allium.api.options.binder.ColorPickerBinder;
 import io.firstwave.allium.api.options.binder.OptionBinder;
 import io.firstwave.allium.api.options.binder.SliderBinder;
 import javafx.beans.property.SimpleObjectProperty;
@@ -29,6 +27,7 @@ public class OptionsController {
         final SliderBinder sb = new SliderBinder();
         Options.registerBinder(IntegerOption.class, sb);
         Options.registerBinder(FloatOption.class, sb);
+        Options.registerBinder(ColorOption.class, new ColorPickerBinder());
     }
 
     private final List<Node> mChildList;
@@ -38,6 +37,9 @@ public class OptionsController {
     public OptionsController(Pane pane) {
         mChildList = pane.getChildren();
         mOptions.addListener((observable, oldValue, newValue) -> onOptionsChanged(oldValue, newValue));
+
+        registerDefaultBinders();
+
         onOptionsChanged(null, null);
     }
 

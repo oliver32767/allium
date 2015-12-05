@@ -1,5 +1,6 @@
 package io.firstwave.allium.api;
 
+import io.firstwave.allium.api.inject.Injector;
 import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.utils.ThreadEnforcer;
 import javafx.beans.property.BooleanProperty;
@@ -241,7 +242,9 @@ public class Layer {
         return mCanvas;
     }
 
-    protected void onPreRender(RenderContext ctx) {}
+    protected void onPreRender(RenderContext ctx) {
+        Injector.inject(this, this);
+    }
 
     final void render(RenderContext ctx) {
         ThreadEnforcer.BACKGROUND.enforce();

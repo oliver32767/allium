@@ -3,7 +3,7 @@ package io.firstwave.allium.api.layer;
 import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.inject.Inject;
-import io.firstwave.allium.api.inject.Injector;
+import io.firstwave.allium.api.options.ColorOption;
 import io.firstwave.allium.api.options.FloatOption;
 import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
@@ -21,13 +21,17 @@ public class GridLayer extends Layer {
     @Inject
     private int majorInterval = 4;
 
-    private Color minorColor = Color.DARKGRAY.darker();
-    private Color majorColor = Color.GRAY.darker();
+    @Inject
+    private Color minorColor;
+    @Inject
+    private Color majorColor;
 
     @Inject
     private float minorStrokeWidth = 1;
     @Inject
     private float majorStrokeWidth = 2;
+
+
 
     public GridLayer() {
         this(null);
@@ -37,17 +41,14 @@ public class GridLayer extends Layer {
         super(name);
         setOptions(new Options.Builder()
                 .add("minorInterval", new IntegerOption(25, -1, 1000))
-                .add("majorInterval", new IntegerOption(4, -1, 100))
                 .add("minorStrokeWidth", new FloatOption(1f, 0f, 5f))
+                .add("minorColor", new ColorOption(Color.DARKGREY.darker()))
+                .add("majorInterval", new IntegerOption(4, -1, 100))
                 .add("majorStrokeWidth", new FloatOption(2f, 0f, 5f))
+                .add("majorColor", new ColorOption(Color.GREY.darker()))
                 .build());
 
 
-    }
-
-    @Override
-    protected void onPreRender(RenderContext ctx) {
-        Injector.inject(this, this);
     }
 
     @Override

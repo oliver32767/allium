@@ -228,16 +228,14 @@ public class SceneViewerController implements Initializable {
 
         sceneReload.setOnAction(event -> reload());
 
-
-        OptionsController.registerDefaultBinders();
         mOptionsController = new OptionsController(configList);
-
 
         configApply.disableProperty().bind(mLocked);
         configApply.setOnAction(event1 -> {
                     render();
                 }
         );
+
         configDiscard.disableProperty().bind(mLocked);
         configDiscard.setOnAction(event -> mOptionsController.reset());
     }

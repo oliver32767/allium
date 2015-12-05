@@ -7,9 +7,13 @@ import io.firstwave.allium.api.inject.Inject;
 import io.firstwave.allium.api.options.BooleanOption;
 import io.firstwave.allium.api.options.FloatOption;
 import io.firstwave.allium.api.options.Options;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.paint.Color;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+
+import static io.firstwave.allium.demo.LayerUtils.gc;
 
 /**
  * Created by obartley on 12/2/15.
@@ -41,12 +45,19 @@ public class TroubleMaker extends Layer {
     }
 
     @Override
+    protected Canvas onCreateCanvas(RenderContext ctx) {
+        return new Canvas(ctx.width / 2, ctx.height / 2);
+    }
+
+    @Override
     protected void onRender(RenderContext ctx) {
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        gc(this).setFill(Color.PINK);
+        gc(this).fillRect(0, 0, ctx.width / 2, ctx.height / 2);
         throw new RuntimeException();
     }
 }

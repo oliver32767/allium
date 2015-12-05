@@ -3,7 +3,6 @@ package io.firstwave.allium.api.layer;
 import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.inject.Inject;
-import io.firstwave.allium.api.inject.Injector;
 import io.firstwave.allium.api.options.BooleanOption;
 import io.firstwave.allium.api.options.FloatOption;
 import io.firstwave.allium.api.options.IntegerOption;
@@ -51,7 +50,6 @@ public class NoiseLayer extends Layer {
 
     @Override
     protected void onPreRender(RenderContext ctx) {
-        Injector.inject(this, this);
         mNoiseGenerator = new SimplexNoiseGenerator(seed);
         noise = new double[(int)ctx.width][(int)ctx.height];
     }
