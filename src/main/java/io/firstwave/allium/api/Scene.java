@@ -23,6 +23,11 @@ public abstract class Scene {
 
     private SimpleObjectProperty<RenderContext> mRenderContext = new SimpleObjectProperty<>();
 
+    private void setRoot(Layer root) {
+        mRoot = root;
+        mRoot.setScene(this);
+    }
+
     public final Layer getRoot() {
         return mRoot;
     }
@@ -56,7 +61,7 @@ public abstract class Scene {
     }
 
     public final void load() {
-        mRoot = onCreate();
+        setRoot(onCreate());
     }
     
     protected abstract Layer onCreate();

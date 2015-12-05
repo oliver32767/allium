@@ -22,6 +22,7 @@ public class Layer {
 
     private Options mOptions;
     private Layer mParent;
+    private Scene mScene;
     private RenderContext mRenderContext;
     private Canvas mCanvas;
 
@@ -152,6 +153,13 @@ public class Layer {
         return null;
     }
 
+    final void setScene(Scene scene) {
+        mScene = scene;
+    }
+
+    protected Scene getScene() {
+        return mScene;
+    }
 
     /**
      * Main thread only
