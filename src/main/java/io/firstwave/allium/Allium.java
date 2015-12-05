@@ -25,7 +25,8 @@ public class Allium extends Application {
         final Parent root = loader.load();
         final SceneViewerController controller = loader.getController();
         controller.setStage(primaryStage);
-        primaryStage.setScene(new Scene(root, 600, 400));
+        Scene scene = new Scene(root, 600, 400);
+        primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(event -> Platform.exit());
         primaryStage.getIcons().addAll(new Image("/images/icon_512.png"));
 

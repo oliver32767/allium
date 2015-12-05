@@ -64,6 +64,8 @@ public class SceneViewerController implements Initializable {
     private MenuItem menuRender;
     @FXML
     private MenuItem menuAbout;
+    @FXML
+    private CheckMenuItem menuTheme;
 
     @FXML
     private Font x3;
@@ -172,6 +174,8 @@ public class SceneViewerController implements Initializable {
         menuNoZoom.setUserData(0);
         menuNoZoom.setOnAction(zoom);
 
+        menuTheme.setOnAction(event -> setTheme(menuTheme.isSelected()));
+
         menuQuit.setOnAction(event -> {
             if (getStage() != null) {
                 getStage().close();
@@ -235,6 +239,17 @@ public class SceneViewerController implements Initializable {
             mStage.setTitle(Const.APP_NAME + " (" + Const.VERSION + ")");
         } else {
             mStage.setTitle(mScene.toString() + " - " + Const.APP_NAME + " (" + Const.VERSION + ")");
+        }
+    }
+
+    private void setTheme(boolean dark) {
+        if (mStage == null) {
+            return;
+        }
+        if (dark) {
+            mStage.getScene().getStylesheets().add("/styles/dark.css");
+        } else {
+            mStage.getScene().getStylesheets().remove("/styles/dark.css");
         }
     }
 
@@ -381,7 +396,7 @@ public class SceneViewerController implements Initializable {
         final int blue = (int) (color.getBlue() * 255);
         final String blueString = Integer.toHexString(blue);
 
-        String hexColor = "#" + redString + greenString + blueString;
+        final String hexColor = "#" + redString + greenString + blueString;
 
         scrollPane.setStyle("-fx-background: " + hexColor);
     }

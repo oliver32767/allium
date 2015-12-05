@@ -59,6 +59,12 @@
                                 <KeyCodeCombination alt="UP" code="DIGIT0" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                             </accelerator>
                         </MenuItem>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <CheckMenuItem fx:id="menuTheme" mnemonicParsing="false" text="Dark Theme">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="D" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+                     </accelerator>
+                  </CheckMenuItem>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
