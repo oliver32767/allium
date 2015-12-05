@@ -89,6 +89,8 @@ public class SceneViewerController implements Initializable {
     private TreeTableColumn<Layer, Boolean> nodeVisible;
     @FXML
     private TreeTableColumn<Layer, String> nodeMessage;
+    @FXML
+    private TreeTableColumn<Layer, Layer> nodeStatus;
 
     @FXML
     private TextArea textLog;
@@ -149,6 +151,25 @@ public class SceneViewerController implements Initializable {
             return rv;
         });
 
+        nodeStatus.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
+        nodeStatus.setCellFactory(param -> {
+            final TreeTableCell<Layer, Layer> rv = new TextFieldTreeTableCell<Layer, Layer>() {
+                @Override
+                public void updateItem(Layer item, boolean empty) {
+                    if (item == null || empty) {
+                        setText(null);
+                        return;
+                    }
+                    if (item.getOptions() == null || item.getOptions().getKeys().size() == 0) {
+                        setText(null);
+                    } else {
+                        setText("⚙");
+                    }
+                }
+            };
+            rv.setAlignment(Pos.CENTER);
+            return rv;
+        });
         sceneTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             updateOptionsList(newValue.getValue().getOptions());
         });
