@@ -6,7 +6,9 @@ import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.api.inject.FieldType;
 import io.firstwave.allium.api.inject.Inject;
 import io.firstwave.allium.api.inject.Injector;
+import io.firstwave.allium.api.layer.AnnotationLayer;
 import io.firstwave.allium.api.layer.GridLayer;
+import io.firstwave.allium.api.layer.NoiseLayer;
 import javafx.scene.paint.Color;
 
 import static io.firstwave.allium.demo.LayerUtils.gc;
@@ -29,11 +31,7 @@ public class DemoScene extends Scene {
 
     @Inject Layer trouble;
 
-    @Inject
-    private float floaty;
-
-    @Inject
-    private boolean Awesome;
+    @Inject AnnotationLayer anno;
 
     @Override
     protected Layer onCreate() {
@@ -43,35 +41,30 @@ public class DemoScene extends Scene {
         setWidth(1024);
         setHeight(1024);
 
+        root.addChild(new NoiseLayer());
         foo = root.addChild(new Layer("foo"));
         foo.addChild(new RectLayer());
         foo.addChild(new RectLayer());
         bar = root.addChild(new Layer("bar"));
         spam = new Layer("spam");
-        eggs = spam.addChild(new Layer("eggs"));
+        eggs = new Layer("eggs");
         eggs.addChild(new TroubleMaker());
-        eggs.addChild(new RectLayer());
-        eggs.addChild(new RectLayer());
-        eggs.addChild(new RectLayer());
-        eggs.addChild(new RectLayer());
-        eggs.addChild(new RectLayer());
-        spam.addChild(new RectLayer());
-        spam.addChild(new RectLayer());
-        spam.addChild(new RectLayer());
-        spam.addChild(new Layer());
-        spam.addChild(new Layer());
-        spam.addChild(new Layer());
+        root.addChild(eggs);
 
-        Layer bbhh = new Layer();
+
         for (int i = 0; i < 10; i++) {
-            bbhh.addChild(new RectLayer());
+            spam.addChild(new RectLayer());
         }
-
-        spam.addChild(bbhh);
 
         root.addChild(spam);
         root.addChild(new RectLayer());
-        root.addChild(new NoiseLayer());
+
+        anno = new AnnotationLayer("anno");
+
+        anno.addAnnotation(new AnnotationLayer.Annotation("DERP", 512, 512));
+
+        root.addChild(anno);
+
 
         Injector.inject(this, root);
 

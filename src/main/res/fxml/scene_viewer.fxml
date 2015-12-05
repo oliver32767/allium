@@ -136,7 +136,7 @@
                                             <children>
                                                 <ToolBar prefHeight="40.0" prefWidth="200.0">
                                                     <items>
-                                                        <Label text="Config" />
+                                                        <Label text="Options" />
                                                         <Pane HBox.hgrow="ALWAYS" />
                                                         <Button fx:id="configDiscard" mnemonicParsing="false" text="Discard" />
                                                         <Button fx:id="configApply" mnemonicParsing="false" text="Apply" />
@@ -146,7 +146,10 @@
                                        <content>
                                           <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                              <children>
-                                                <VBox fx:id="configList" prefHeight="200.0" prefWidth="100.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <VBox fx:id="configList" prefHeight="200.0" prefWidth="100.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <padding>
+                                                      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                                   </padding></VBox>
                                              </children>
                                           </AnchorPane>
                                        </content>
@@ -163,13 +166,10 @@
         </SplitPane>
         <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
             <children>
-                <Label fx:id="statusMessage" maxHeight="1.7976931348623157E308" maxWidth="-1.0" text="Ready" HBox.hgrow="ALWAYS">
+                <Label fx:id="statusMessage" maxHeight="1.7976931348623157E308" maxWidth="-1.0" text="Ready" textFill="#515151" HBox.hgrow="ALWAYS">
                     <font>
                         <Font size="11.0" fx:id="x3" />
                     </font>
-                    <textFill>
-                        <Color blue="0.625" green="0.625" red="0.625" fx:id="x4" />
-                    </textFill>
                 </Label>
                 <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
             <ProgressBar fx:id="progress" prefWidth="75.0" progress="0.0" />

@@ -79,7 +79,7 @@ public abstract class Scene {
             mRoot.each(layer -> layer.preRender(ctx));
         }
 
-        ctx.handleMessage("START", "Starting render with " + ctx);
+        ctx.handleMessage("START", "→ Starting render with " + ctx);
         final Task<Void> renderTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
@@ -100,14 +100,14 @@ public abstract class Scene {
                 final PrintWriter pw = new PrintWriter(sw);
                 Logger.warn(tr);
                 tr.printStackTrace(pw);
-                ctx.handleMessage("FAIL", "Rendering could not be completed: " + tr + "\n");
+                ctx.handleMessage("FAIL", "↖ Rendering could not be completed: " + tr + "\n");
             }
 
             @Override
             protected void succeeded() {
                 mRenderContext.setValue(null);
                 final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
-                ctx.handleMessage("FINISH", String.format("Rendered %d/%d layer(s) in %.4f second(s)\n", ctx.getLayerCount(), ctx.getPublishCount(), elapsed));
+                ctx.handleMessage("FINISH", String.format("← Rendered %d/%d layer(s) in %.4f second(s)\n", ctx.getLayerCount(), ctx.getPublishCount(), elapsed));
             }
         };
 

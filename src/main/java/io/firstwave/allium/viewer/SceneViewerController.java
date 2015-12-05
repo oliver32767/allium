@@ -103,7 +103,12 @@ public class SceneViewerController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        initSceneTree();
+        initMenus();
+        initOptions();
+    }
 
+    private void initSceneTree() {
         nodeName.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
 
         nodeName.setCellFactory(LayerNameTreeTableCell.getFactory());
@@ -145,13 +150,11 @@ public class SceneViewerController implements Initializable {
         sceneTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             updateOptionsList(newValue.getValue().getOptions());
         });
+    }
 
-        configList.disableProperty().bind(mLocked);
-
+    private void initMenus() {
         menuOpen.setOnAction(event -> open());
         menuReload.setOnAction(event -> reload());
-        sceneReload.setOnAction(event -> reload());
-
         menuRender.disableProperty().bind(mLocked);
 
 //        menuZoomIn.disableProperty().bind(mLocked);
@@ -193,6 +196,12 @@ public class SceneViewerController implements Initializable {
 
             alert.showAndWait();
         });
+    }
+
+    private void initOptions() {
+        configList.disableProperty().bind(mLocked);
+
+        sceneReload.setOnAction(event -> reload());
 
 
         OptionsController.registerDefaultBinders();
@@ -206,7 +215,6 @@ public class SceneViewerController implements Initializable {
         );
         configDiscard.disableProperty().bind(mLocked);
         configDiscard.setOnAction(event -> mOptionsController.reset());
-
     }
 
 
@@ -231,6 +239,7 @@ public class SceneViewerController implements Initializable {
     }
 
     private void open() {
+        // TODO: implement file picker stuff
         setSceneType(DemoScene.class);
     }
 
@@ -238,6 +247,21 @@ public class SceneViewerController implements Initializable {
         menuReload.setDisable(sceneType == null);
         mSceneType = sceneType;
         reload();
+    }
+
+    private void zoom(int amount) {
+        double scale = layerStack.getScaleX();
+
+        if (amount == 0) {
+            scale = 1.0f;
+        } else if (amount > 0) {
+            scale = scale * SCALE_DELTA;
+        } else {
+            scale = scale * (1 / SCALE_DELTA);
+        }
+
+        layerStack.setScaleX(scale);
+        layerStack.setScaleY(scale);
     }
 
     private void reload() {
@@ -313,21 +337,6 @@ public class SceneViewerController implements Initializable {
         }
     }
 
-    private void zoom(int amount) {
-        double scale = layerStack.getScaleX();
-
-        if (amount == 0) {
-            scale = 1.0f;
-        } else if (amount > 0) {
-            scale = scale * SCALE_DELTA;
-        } else {
-            scale = scale * (1 / SCALE_DELTA);
-        }
-
-        layerStack.setScaleX(scale);
-        layerStack.setScaleY(scale);
-    }
-
     private void render() {
         if (mScene == null || mLocked.getValue()) {
             Logger.debug("Skipping render");
@@ -354,7 +363,7 @@ public class SceneViewerController implements Initializable {
                 },
                 (ctx, source, message) -> setStatus("[" + source + "] " + message),
                 (ctx, source, tr) -> setStatus("[" + source + "] " + tr.toString()));
-
+        progress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         mScene.render(context);
 
     }

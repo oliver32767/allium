@@ -38,6 +38,7 @@ public class OptionsController {
     public OptionsController(Pane pane) {
         mChildList = pane.getChildren();
         mOptions.addListener((observable, oldValue, newValue) -> onOptionsChanged(oldValue, newValue));
+        onOptionsChanged(null, null);
     }
 
     public Options getOptions() {
@@ -52,7 +53,11 @@ public class OptionsController {
         mChildList.clear();
         mNodeMap.clear();
 
-        if (newValue == null) {
+        if (newValue == null || newValue.getKeys().size() == 0) {
+            final Label lbl = new Label("No options available for current selection");
+            lbl.setWrapText(true);
+            lbl.setOpacity(0.5);
+            mChildList.add(lbl);
             return;
         }
 

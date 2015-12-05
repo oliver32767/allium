@@ -51,6 +51,10 @@ public final class Options {
         return new Options(options);
     }
 
+    public static Builder create() {
+        return new Builder();
+    }
+
     private final BooleanProperty mUnmodified = new SimpleBooleanProperty(false);
 
     private final Map<String, Option> mItems;
