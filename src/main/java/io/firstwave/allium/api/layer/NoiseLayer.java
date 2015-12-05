@@ -25,6 +25,7 @@ public class NoiseLayer extends Layer {
     @Inject private float amplitude;
     @Inject boolean normalized;
 
+    private NoiseGeneratorFactory mNoiseGeneratorFactory;
 
 
     public NoiseLayer() {
@@ -35,11 +36,15 @@ public class NoiseLayer extends Layer {
         super(name);
         setOptions(Options.create()
                 .add("octaves", new IntegerOption(1))
-                .add("frequency", new FloatOption(0))
-                .add("amplitude", new FloatOption(0))
+                .add("frequency", new FloatOption(1))
+                .add("amplitude", new FloatOption(1))
                 .add("normalized", new BooleanOption(false))
                 .build()
         );
+    }
+
+    public void setNoiseGeneratorFactory(NoiseGeneratorFactory noiseGeneratorFactory) {
+        mNoiseGeneratorFactory = noiseGeneratorFactory;
     }
 
     public double[][] getNoise() {
@@ -48,12 +53,17 @@ public class NoiseLayer extends Layer {
 
     @Override
     protected void onPreRender(RenderContext ctx) {
+        super.onPreRender(ctx);
         mNoiseGenerator = getNoiseGenerator(ctx);
         noise = new double[(int)ctx.width][(int)ctx.height];
     }
 
     protected NoiseGenerator getNoiseGenerator(RenderContext ctx) {
-        return new SimplexNoiseGenerator(ctx.getRandom());
+        NoiseGenerator rv = null;
+        if (mNoiseGeneratorFactory != null) {
+            rv = mNoiseGeneratorFactory.getNoiseGenerator(ctx);
+        }
+        return (rv == null) ? new SimplexNoiseGenerator(ctx.getRandom()) : rv;
     }
 
     @Override
@@ -76,5 +86,9 @@ public class NoiseLayer extends Layer {
                 getCanvas().getGraphicsContext2D().getPixelWriter().setColor(x, y, c);
             }
         }
+    }
+
+    public interface NoiseGeneratorFactory {
+        NoiseGenerator getNoiseGenerator(RenderContext ctx);
     }
 }
