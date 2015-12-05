@@ -31,7 +31,7 @@ public class DemoRoot extends Layer {
 
     Layer eggs;
 
-    @Inject AnnotationLayer anno;
+    @Inject(key = "anno") AnnotationLayer anno;
 
     @Inject
     Color backgroundColor;

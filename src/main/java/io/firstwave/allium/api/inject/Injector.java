@@ -23,6 +23,7 @@ public class Injector {
 
     // TODO: add FieldType param to force a specific type of injection
     private Injector(Object target, Options options, Layer layer) {
+        Logger.debug("Injecting " + target + " using: " + options + ", " + layer);
         mTarget = target;
         mOptions = options;
         mLayer = layer;
@@ -44,19 +45,20 @@ public class Injector {
     private void inject(Field field, Inject anno) {
         try {
             if (field != null) {
-                Logger.trace("Injecting " + field.toGenericString() + " using " + anno.key() + ":" + anno.type());
+                Logger.trace("Injecting " + field.toGenericString() + " using " +
+                        ("".equals(anno.key()) ? "<empty>" : anno.key()) +
+                        ":" + anno.type());
                 field.setAccessible(true);
             } else {
                 return;
             }
             switch (anno.type()) {
                 case AUTO:
-                    if (field.getType().isAssignableFrom(Layer.class)) {
+                    if (Layer.class.isAssignableFrom(field.getType())) {
                         injectLayer(field, anno);
                     } else {
                         injectOption(field, anno);
                     }
-                    Logger.trace("Injected " + field.getName() + " -> " + field.get(mTarget));
                     break;
                 case LAYER:
                     injectLayer(field, anno);
@@ -78,6 +80,7 @@ public class Injector {
         } else {
             field.set(mTarget, mLayer.findChildByName(anno.key()));
         }
+        Logger.trace("Injected layer " + field.getName() + " -> " + field.get(mTarget));
     }
 
     private void injectOption(Field field, Inject anno) throws IllegalAccessException {
@@ -86,5 +89,6 @@ public class Injector {
         } else {
             field.set(mTarget, mOptions.getValue(anno.key()));
         }
+        Logger.trace("Injected option " + field.getName() + " -> " + field.get(mTarget));
     }
 }
