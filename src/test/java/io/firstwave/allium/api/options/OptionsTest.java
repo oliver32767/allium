@@ -26,14 +26,14 @@ public class OptionsTest {
 
     @Test
     public void testGet() throws Exception {
-        assertTrue(mOptions.getValue(Boolean.class, "boolean"));
-        assertEquals(7, (int) mOptions.getValue(Integer.class, "int"));
+        assertTrue(mOptions.getBoolean("boolean"));
+        assertEquals(7, mOptions.getInt("int"));
     }
 
     @Test
     public void testGetOption() throws Exception {
-        assertEquals(Boolean.class, mOptions.getOption(Boolean.class, "boolean").mType);
-        assertEquals(Integer.class, mOptions.getOption(Integer.class, "int").mType);
+        assertEquals(Boolean.class, mOptions.getOption("boolean").getValueType());
+        assertEquals(Integer.class, mOptions.getOption("int").getValueType());
     }
 
     @Test
@@ -46,18 +46,18 @@ public class OptionsTest {
 
     @Test
     public void testGetType() throws Exception {
-        assertEquals(Boolean.class, mOptions.getOption("boolean").getType());
-        assertEquals(Integer.class, mOptions.getOption("int").getType());
+        assertEquals(Boolean.class, mOptions.getOption("boolean").getValueType());
+        assertEquals(Integer.class, mOptions.getOption("int").getValueType());
     }
 
     @Test
     public void testEdit() throws Exception {
-        mOptions.edit().set(Boolean.class, "boolean", false);
-        mOptions.edit().set(Integer.class, "int", 4);
-        mOptions.edit().apply();
+        mOptions.getEditor().setBoolean("boolean", false);
+        mOptions.getEditor().setInt("int", 4);
+        mOptions.getEditor().apply();
 
-        assertFalse(mOptions.getValue(Boolean.class, "boolean"));
-        assertEquals(4, (int) mOptions.getValue(Integer.class, "int"));
+        assertFalse(mOptions.getBoolean("boolean"));
+        assertEquals(4, mOptions.getInt("int"));
 
     }
 }

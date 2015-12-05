@@ -1,58 +1,37 @@
 package io.firstwave.allium.api.options;
 
 
-import io.firstwave.allium.api.options.binder.DefaultBinder;
-import io.firstwave.allium.api.options.binder.OptionBinder;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.pmw.tinylog.Logger;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by obartley on 12/1/15.
  */
 public final class Options {
 
-    // STATIC BINDER API ///////////////////////////////////////////////////////////////////////////////////////////////
-
-    private static final OptionBinder sDefaultBinder = new DefaultBinder();
-    private static final Map<Class<? extends Option>, OptionBinder> sBinders = new HashMap<>();
-
-    public static void registerBinder(Class<? extends Option> type, OptionBinder binder) {
-        synchronized (sBinders) {
-            sBinders.put(type, binder);
-        }
-    }
-
-    public static void unregisterBinder(Class<? extends Option> type) {
-        synchronized (sBinders) {
-            sBinders.remove(type);
-        }
-    }
-
-    public static OptionBinder getBinder(Class<? extends Option> type) {
-        synchronized (sBinders) {
-            final OptionBinder rv = sBinders.get(type);
-            if (rv != null) {
-                return rv;
-            } else {
-                return sBinders.getOrDefault(Option.class, sDefaultBinder);
-            }
-        }
-    }
-
     public static final Options EMPTY = new Options();
+    private static final Editor READ_ONLY_EDITOR = new Editor(null) {
+        @Override
+        public Editor set(String key, Object value) {
+            throw new UnsupportedOperationException();
+        }
+    };
 
-    public static Options unmodifiableOptions(Options options) {
-        return new Options(options);
+    public static Options unmodifiableCopy(Options options) {
+        final Options rv = new Options(options);
+        rv.mEditor = READ_ONLY_EDITOR;
+        return rv;
     }
 
     public static Builder create() {
         return new Builder();
+    }
+
+    public static Builder buildUpon(Options options) {
+        return new Builder(options);
     }
 
     private final BooleanProperty mUnmodified = new SimpleBooleanProperty(false);
@@ -73,13 +52,6 @@ public final class Options {
         }
         mItems = copy.mItems;
         mValues = copy.mValues;
-        mEditor = new Editor() {
-            @Override
-            public int apply() {
-                throw new UnsupportedOperationException();
-            }
-        };
-
     }
 
     private Options(Builder b) {
@@ -87,35 +59,53 @@ public final class Options {
         mValues = new HashMap<>(b.mValues);
     }
 
-    public Object getValue(String key) {
+    public byte getByte(String key) {
+        return (byte) get(key);
+    }
+
+    public short getShort(String key) {
+        return (short) get(key);
+    }
+
+    public int getInt(String key) {
+        return (int) get(key);
+    }
+
+    public long getLong(String key) {
+        return (long) get(key);
+    }
+
+    public float getFloat(String key) {
+        return (float) get(key);
+    }
+
+    public double getDouble(String key) {
+        return (double) get(key);
+    }
+
+    public boolean getBoolean(String key) {
+        return (boolean) get(key);
+    }
+
+    public char getChar(String key) {
+        return (char) get(key);
+    }
+
+    public String getString(String key) {
+        return (String) get(key);
+    }
+
+    public Object get(String key) {
         return mValues.get(key);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T getValue(Class<T> type, String key) {
-        if (!validateType(type, key)) {
-            return null;
-        }
-        return (T) getValue(key);
-    }
-
-    public Class<?> getValueType(String key) {
-        if (!mItems.containsKey(key)) {
-            return null;
-        }
-        return mItems.get(key).getType();
-    }
-
     public Option<?> getOption(String key) {
-        return mItems.get(key);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> Option<T> getOption(Class<T> type, String key) {
-        if (!validateType(type, key)) {
+        final Option<?> rv = mItems.get(key);
+        if (rv == null) {
             return null;
         }
-        return (Option<T>) getOption(key);
+        rv.mOptions = this;
+        return rv;
     }
 
     public Class<? extends Option> getOptionType(String key) {
@@ -130,11 +120,15 @@ public final class Options {
         return mItems.keySet();
     }
 
-    public Editor edit() {
+    public Editor getEditor() {
         if (mEditor == null) {
-            mEditor = new Editor();
+            mEditor = new Editor(this);
         }
         return mEditor;
+    }
+
+    public Builder buildUpon() {
+        return buildUpon(this);
     }
 
     public BooleanProperty unmodifiedProperty() {
@@ -157,27 +151,61 @@ public final class Options {
         return rv;
     }
 
-    public class Editor {
-
-        private Editor() {
+    public static class Editor {
+        private final Options mOptions;
+        private Editor(Options options) {
+            mOptions = options;
         }
 
         private Map<String, Object> mChanges = new HashMap<>();
 
+        public void setByte(String key, byte value) {
+            set(key, value);
+        }
+
+        public void setShort(String key, short value) {
+            set(key, value);
+        }
+
+        public void setInt(String key, int value) {
+            set(key, value);
+        }
+
+        public void setLong(String key, long value) {
+            set(key, value);
+        }
+
+        public void setFloat(String key, float value) {
+            set(key, value);
+        }
+
+        public void setDouble(String key, double value) {
+            set(key, value);
+        }
+
+        public void setBoolean(String key, boolean value) {
+            set(key, value);
+        }
+
+        public void setChar(String key, char value) {
+            set(key, value);
+        }
+
+        public void setString(String key, String value) {
+            set(key, value);
+        }
+
         @SuppressWarnings("unchecked")
-        public <T> Editor set(Class<T> type, String key, T value) {
-
-            if (!validateType(type, key)) {
-                return this;
-            }
-
-            final Option opt = mItems.get(key);
+        public Editor set(String key, Object value) {
+            final Option opt = mOptions.getOption(key);
 
             if (opt == null) {
                 Logger.warn("Key " + key + " is not mapped to an option");
                 return this;
-            } else if (!opt.mType.equals(type)) {
-                typeWarning(type, key);
+            }
+
+            final Class<?> type = opt.mValueType;
+            if (!mOptions.validateType(type, key)) {
                 return this;
             }
 
@@ -186,7 +214,7 @@ public final class Options {
                 return this;
             }
 
-            if (!mValues.containsKey(key) || !opt.equals(mValues.get(key), value)) {
+            if (!mOptions.mValues.containsKey(key) || !opt.equals(mOptions.mValues.get(key), value)) {
                 Logger.debug("added " + key + " -> " + value + " to list of changes");
                 mChanges.put(key, value);
             } else {
@@ -195,23 +223,39 @@ public final class Options {
             }
 
 
-            mUnmodified.setValue(!mChanges.isEmpty());
+            mOptions.mUnmodified.setValue(!mChanges.isEmpty());
             return this;
         }
 
         public int apply() {
-            return Options.this.apply(this);
+            return mOptions.apply(this);
         }
 
         public void cancel() {
             mChanges.clear();
-            mUnmodified.setValue(true);
+            mOptions.mUnmodified.setValue(true);
+        }
+
+        void cancel(String key) {
+            mChanges.remove(key);
+            mOptions.mUnmodified.setValue(!mChanges.isEmpty());
         }
     }
 
     public static final class Builder {
-        private final Map<String, Option> mItems = new LinkedHashMap<>();
-        private final Map<String, Object> mValues = new HashMap<>();
+
+        private final Map<String, Option> mItems;
+        private final Map<String, Object> mValues;
+
+        public Builder() {
+            mItems = new LinkedHashMap<>();
+            mValues  = new HashMap<>();
+        }
+
+        public Builder(Options copy) {
+            mItems = new LinkedHashMap<>(copy.mItems);
+            mValues = new HashMap<>(copy.mValues);
+        }
 
         public Builder add(String key, Option item) {
             if (key == null || item == null) {
@@ -222,8 +266,20 @@ public final class Options {
             }
             mItems.put(key, item);
             mValues.put(key, item.mDefaultValue);
+            item.mKey = key;
             return this;
         }
+
+        public Builder addSeparator() {
+            return addSeparator(null);
+        }
+
+        public Builder addSeparator(String label) {
+            add(UUID.randomUUID().toString(), new Separator(label));
+            return this;
+        }
+
+
 
         public Options build() {
             return new Options(this);
@@ -231,12 +287,12 @@ public final class Options {
     }
 
     private boolean validateType(Class<?> type, String key) {
-        final Option opt = mItems.get(key);
+        final Option opt = getOption(key);
         if (opt == null) {
             typeWarning(type, key);
             return false;
         }
-        final boolean rv = opt.mType.equals(type);
+        final boolean rv = opt.mValueType.equals(type);
         if (!rv) {
             typeWarning(type, key);
         }

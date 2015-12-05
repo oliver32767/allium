@@ -1,22 +1,21 @@
 package io.firstwave.allium.api.options.binder;
 
-import io.firstwave.allium.api.options.Options;
+import io.firstwave.allium.api.options.Option;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
 
 /**
  * Created by obartley on 12/3/15.
  */
-public class DefaultBinder implements OptionBinder {
+public class DefaultBinder extends OptionBinder {
 
     @Override
-    public Node bind(String key, Options options) {
-        return new TextField("No binder for key: " + key + " (type: " + options.getOptionType(key) + ")");
+    public Node bind(Option option) {
+        return new TextField("No binder for key: " + option.getKey() + " (type: " + option.getValueType() + ")");
     }
 
     @Override
-    public void updateValue(Node node, String key, Options options) {
+    public void update(Node node, Option option) {
 
     }
-
 }

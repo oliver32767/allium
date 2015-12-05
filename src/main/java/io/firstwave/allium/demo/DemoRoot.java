@@ -8,6 +8,7 @@ import io.firstwave.allium.api.inject.Injector;
 import io.firstwave.allium.api.layer.AnnotationLayer;
 import io.firstwave.allium.api.layer.GridLayer;
 import io.firstwave.allium.api.layer.NoiseLayer;
+import io.firstwave.allium.api.options.BooleanOption;
 import io.firstwave.allium.api.options.ColorOption;
 import io.firstwave.allium.api.options.Options;
 import javafx.scene.paint.Color;
@@ -38,8 +39,13 @@ public class DemoRoot extends Layer {
 
     public DemoRoot() {
 
-        setOptions(Options.create()
+        final Options opts = Options.create()
                 .add("backgroundColor", new ColorOption(Color.BLACK))
+                .build();
+
+        setOptions(Options.buildUpon(opts)
+                .addSeparator("Other stuff")
+                .add("derp", new BooleanOption(true))
                 .build()
         );
 

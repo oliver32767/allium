@@ -1,6 +1,6 @@
 package io.firstwave.allium.api.options.binder;
 
-import io.firstwave.allium.api.options.Options;
+import io.firstwave.allium.api.options.Option;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ColorPicker;
@@ -8,34 +8,37 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import org.pmw.tinylog.Logger;
 
 /**
  * Created by obartley on 12/5/15.
  */
-public class ColorPickerBinder implements OptionBinder {
+public class ColorPickerBinder extends OptionBinder {
+
     @Override
-    public Node bind(final String key, final Options options) {
+    public Node bind(Option option) {
+        if (option.getValueType() != Color.class) {
+            return null;
+        }
+
         final HBox rv = new HBox();
         rv.setAlignment(Pos.CENTER_LEFT);
+        rv.setSpacing(5);
 
-        final Label lbl = new Label(key);
+        final Label lbl = new Label(option.getKey());
         rv.getChildren().add(lbl);
-        final ColorPicker cp = new ColorPicker(options.getValue(Color.class, key));
+        final ColorPicker cp = new ColorPicker((Color) option.get());
         cp.valueProperty().addListener((observable, oldValue, newValue) -> {
-            Logger.warn(newValue);
-            options.edit().set(Color.class, key, newValue);
+            option.getEditor().set(newValue);
         });
         rv.getChildren().add(cp);
-
 
         return rv;
     }
 
     @Override
-    public void updateValue(Node node, String key, Options options) {
+    public void update(Node node, Option option) {
         Pane p = (Pane) node;
         ColorPicker cp = (ColorPicker) p.getChildren().get(1);
-        cp.setValue(options.getValue(Color.class, key));
+        cp.setValue((Color) option.get());
     }
 }

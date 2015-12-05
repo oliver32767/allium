@@ -3,7 +3,6 @@ package io.firstwave.allium.api.options.binder;
 import io.firstwave.allium.api.options.FloatOption;
 import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Option;
-import io.firstwave.allium.api.options.Options;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -13,32 +12,29 @@ import javafx.scene.layout.VBox;
 /**
  * Created by obartley on 12/4/15.
  */
-public class SliderBinder implements OptionBinder {
-
+public class SliderBinder extends OptionBinder {
 
     @Override
-    public Node bind(String key, Options options) {
-        final Option opt = options.getOption(key);
-
+    public Node bind(Option option) {
         final Slider sl;
-        final Label lb = new Label(key);
+        final Label lb = new Label(option.getKey());
 
-        if (opt instanceof IntegerOption) {
-            final IntegerOption io = (IntegerOption) opt;
-            sl = new Slider(io.min, io.max, (int) options.getValue(key));
+        if (option instanceof IntegerOption) {
+            final IntegerOption io = (IntegerOption) option;
+            sl = new Slider(io.min, io.max, option.getInt());
 
             sl.valueProperty().addListener((observable, oldValue, newValue) -> {
-                options.edit().set(Integer.class, key, (int) sl.getValue());
-                lb.setText(key + ": " + (int) sl.getValue());
+                option.getEditor().setInt((int) sl.getValue());
+                lb.setText(option.getKey() + ": " + (int) sl.getValue());
             });
 
-        } else if (opt instanceof FloatOption) {
-            final FloatOption io = (FloatOption) opt;
-            sl = new Slider(io.min, io.max, (float) options.getValue(key));
+        } else if (option instanceof FloatOption) {
+            final FloatOption io = (FloatOption) option;
+            sl = new Slider(io.min, io.max, option.getFloat());
 
             sl.valueProperty().addListener((observable, oldValue, newValue) -> {
-                options.edit().set(Float.class, key, (float) sl.getValue());
-                lb.setText(key + ": " + (float) sl.getValue());
+                option.getEditor().setFloat((float) sl.getValue());
+                lb.setText(option.getKey() + ": " + (float) sl.getValue());
             });
 
         } else {
@@ -49,17 +45,15 @@ public class SliderBinder implements OptionBinder {
     }
 
     @Override
-    public void updateValue(Node node, String key, Options options) {
+    public void update(Node node, Option option) {
         final Pane pane = (Pane) node;
 
-        ((Label) pane.getChildren().get(0)).setText(key + ": " + options.getValue(key));
 
-        final Option opt = options.getOption(key);
-
-        if (opt instanceof IntegerOption) {
-            ((Slider) pane.getChildren().get(1)).setValue((int) options.getValue(key));
-        } else if (opt instanceof FloatOption) {
-            ((Slider) pane.getChildren().get(1)).setValue((float) options.getValue(key));
+        if (option instanceof IntegerOption) {
+            ((Slider) pane.getChildren().get(1)).setValue(option.getInt());
+            ((Label) pane.getChildren().get(0)).setText(option.getKey() + ": " + option.getInt());
+        } else if (option instanceof FloatOption) {
+            ((Slider) pane.getChildren().get(1)).setValue(option.getFloat());
         }
     }
 }

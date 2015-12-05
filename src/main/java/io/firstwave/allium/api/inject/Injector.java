@@ -21,7 +21,6 @@ public class Injector {
     private final Options mOptions;
     private final Layer mLayer;
 
-    // TODO: add FieldType param to force a specific type of injection
     private Injector(Object target, Options options, Layer layer) {
         Logger.debug("Injecting " + target + " using: " + options + ", " + layer);
         mTarget = target;
@@ -85,9 +84,9 @@ public class Injector {
 
     private void injectOption(Field field, Inject anno) throws IllegalAccessException {
         if ("".equals(anno.key())) {
-            field.set(mTarget, mOptions.getValue(field.getName()));
+            field.set(mTarget, mOptions.get(field.getName()));
         } else {
-            field.set(mTarget, mOptions.getValue(anno.key()));
+            field.set(mTarget, mOptions.get(anno.key()));
         }
         Logger.trace("Injected option " + field.getName() + " -> " + field.get(mTarget));
     }

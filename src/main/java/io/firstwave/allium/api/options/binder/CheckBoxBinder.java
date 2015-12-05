@@ -1,26 +1,26 @@
 package io.firstwave.allium.api.options.binder;
 
-import io.firstwave.allium.api.options.Options;
+import io.firstwave.allium.api.options.Option;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 
 /**
  * Created by obartley on 12/2/15.
  */
-public class CheckBoxBinder implements OptionBinder {
+public class CheckBoxBinder extends OptionBinder {
 
     @Override
-    public Node bind(final String key, final Options options) {
-        if (options.getOption(key) == null || options.getOption(key).getType() != Boolean.class) {
+    public Node bind(Option option) {
+        if (option.getValueType() != Boolean.class) {
             return null;
         }
-        final CheckBox rv = new CheckBox(key);
-        rv.setOnAction(event -> options.edit().set(Boolean.class, key, rv.isSelected()));
+        final CheckBox rv = new CheckBox(option.getKey());
+        rv.setOnAction(event -> option.getEditor().setBoolean(rv.isSelected()));
         return rv;
     }
 
     @Override
-    public void updateValue(Node node, String key, Options options) {
-        ((CheckBox) node).setSelected(options.getValue(Boolean.class, key));
+    public void update(Node node, Option option) {
+        ((CheckBox) node).setSelected(option.getBoolean());
     }
 }
