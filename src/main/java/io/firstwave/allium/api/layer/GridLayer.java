@@ -24,10 +24,10 @@ public class GridLayer extends Layer {
     private Color minorColor = Color.DARKGRAY.darker();
     private Color majorColor = Color.GRAY.darker();
 
-//    @Inject
+    @Inject
     private float minorStrokeWidth = 1;
-//    @Inject
-    private float majorStrikeWidth = 2;
+    @Inject
+    private float majorStrokeWidth = 2;
 
     public GridLayer() {
         this(null);
@@ -63,7 +63,7 @@ public class GridLayer extends Layer {
                 if (majorInterval > 0 && xInt++ > majorInterval) {
                     xInt = 0;
                     gc.setStroke(majorColor);
-                    gc.setLineWidth(majorStrikeWidth);
+                    gc.setLineWidth(majorStrokeWidth);
                 } else {
                     gc.setStroke(minorColor);
                     gc.setLineWidth(minorStrokeWidth);
@@ -73,7 +73,7 @@ public class GridLayer extends Layer {
             if (majorInterval > 0 && yInt++ > majorInterval) {
                 yInt = 0;
                 gc.setStroke(majorColor);
-                gc.setLineWidth(majorStrikeWidth);
+                gc.setLineWidth(majorStrokeWidth);
             } else {
                 gc.setStroke(minorColor);
                 gc.setLineWidth(minorStrokeWidth);
