@@ -78,13 +78,14 @@ public abstract class Scene {
 
         final long startTime = System.currentTimeMillis();
 
+        ctx.handleMessage("START", "→ Starting render with " + ctx);
+
         // pre render on main thread
         onPreRender(ctx);
         if (mRoot != null) {
             mRoot.each(layer -> layer.preRender(ctx));
         }
 
-        ctx.handleMessage("START", "→ Starting render with " + ctx);
         final Task<Void> renderTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {

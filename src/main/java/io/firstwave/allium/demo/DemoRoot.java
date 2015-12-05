@@ -4,12 +4,14 @@ import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.inject.FieldType;
 import io.firstwave.allium.api.inject.Inject;
+import io.firstwave.allium.api.inject.Injector;
 import io.firstwave.allium.api.layer.AnnotationLayer;
 import io.firstwave.allium.api.layer.GridLayer;
 import io.firstwave.allium.api.layer.NoiseLayer;
 import io.firstwave.allium.api.options.ColorOption;
 import io.firstwave.allium.api.options.Options;
 import javafx.scene.paint.Color;
+import org.pmw.tinylog.Logger;
 
 import static io.firstwave.allium.demo.LayerUtils.gc;
 
@@ -59,25 +61,28 @@ public class DemoRoot extends Layer {
         }
 
         root.addChild(spam);
-        root.addChild(new RectLayer());
-
         anno = new AnnotationLayer("anno");
 
+        root.addChild(anno);
+
+        addChild(root);
+    }
+
+
+    @Override
+    protected void onPreRender(RenderContext ctx) {
+        super.onPreRender(ctx);
+        Logger.warn(findChildByName("anno"));
+        Injector.inject(this, this);
+        anno.clearAnnotations();
         anno.addAnnotation(new AnnotationLayer.Annotation("Hello.", 512, 512));
         anno.addAnnotation(
                 new AnnotationLayer.Annotation("No, over there", 512, 512)
                         .setOffset(-100, 100)
                         .setScale(0.5)
                         .setColor(Color.PINK)
-
         );
-
-        root.addChild(anno);
-
-
-
-
-        addChild(root);
+        anno.addAnnotation(new AnnotationLayer.Annotation("seed:" + ctx.seed, 128, 128));
     }
 
     @Override

@@ -13,6 +13,7 @@ public final class RenderContext {
 
     public final double width;
     public final double height;
+    public final long seed;
 
 
     private final Publisher mPublisher;
@@ -23,11 +24,9 @@ public final class RenderContext {
     private final IntegerProperty mPublishCount = new SimpleIntegerProperty(0);
     private final SimpleBooleanProperty mIsActive = new SimpleBooleanProperty(false);
 
-    public RenderContext(double width, double height, Publisher publisher, MessageHandler messageHandler) {
-        this(width, height, publisher, messageHandler, null);
-    }
 
-    public RenderContext(double width, double height, Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
+    public RenderContext(long seed, double width, double height, Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
+        this.seed = seed;
         this.width = width;
         this.height = height;
         mPublisher = publisher;
@@ -91,7 +90,7 @@ public final class RenderContext {
 
     @Override
     public String toString() {
-        return RenderContext.class.getSimpleName() + " [" + width + " x " + height + "]";
+        return RenderContext.class.getSimpleName() + " [" + width + " x " + height + " : " + seed + "]";
     }
 
     public interface Publisher {

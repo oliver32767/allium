@@ -121,7 +121,10 @@
                                                                 <ChoiceBox maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
                                                             </children>
                                                         </Pane>
-                                                        <Button fx:id="sceneReload" mnemonicParsing="false" text="Reload" />
+                                                        <Button fx:id="sceneReload" mnemonicParsing="false" text="Reload">
+                                             <tooltip>
+                                                <Tooltip text="Reload jar from filesystem" />
+                                             </tooltip></Button>
                                                     </items>
                                                 </ToolBar>
                                     <TreeTableView fx:id="sceneTree" editable="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
@@ -144,6 +147,11 @@
                                                     <items>
                                                         <Label text="Options" />
                                                         <Pane HBox.hgrow="ALWAYS" />
+                                          <TextField fx:id="textSeed" promptText="Random Seed" text="0">
+                                             <tooltip>
+                                                <Tooltip text="Leave blank for a random seed" />
+                                             </tooltip>
+                                          </TextField>
                                                         <Button fx:id="configDiscard" mnemonicParsing="false" text="Discard" />
                                                         <Button fx:id="configApply" mnemonicParsing="false" text="Apply" />
                                                     </items>

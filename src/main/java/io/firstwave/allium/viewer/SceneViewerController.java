@@ -29,6 +29,8 @@ import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
 
 import java.net.URL;
+import java.util.Objects;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 /**
@@ -96,6 +98,9 @@ public class SceneViewerController implements Initializable {
     private TextArea textLog;
     @FXML
     private ProgressBar progress;
+
+    @FXML
+    private TextField textSeed;
 
 
     private OptionsController mOptionsController;
@@ -376,10 +381,25 @@ public class SceneViewerController implements Initializable {
             Logger.debug("Skipping render");
             return;
         }
+
+        long seed;
+        final String seedStr = textSeed.getText();
+        if (seedStr == null || "".equals(seedStr)) {
+            seed = new Random(System.currentTimeMillis()).nextLong();
+        } else  {
+            try {
+                seed = Long.parseLong(seedStr);
+            } catch (NumberFormatException nfe) {
+                seed = Objects.hashCode(seedStr);
+            }
+        }
+
+
         mOptionsController.apply();
         layerStack.getChildren().clear();
 
-        final RenderContext context = new RenderContext(mScene.getWidth(), mScene.getHeight(),
+        final RenderContext context = new RenderContext(
+                seed, mScene.getWidth(), mScene.getHeight(),
                 (ctx, layer) -> {
                     // called on the render thread, we need to push it back to the main thread
                     if (layer != null) {

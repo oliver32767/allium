@@ -20,7 +20,6 @@ public class NoiseLayer extends Layer {
     private NoiseGenerator mNoiseGenerator;
     private double[][] noise;
 
-    @Inject private int seed;
     @Inject private int octaves;
     @Inject private float frequency;
     @Inject private float amplitude;
@@ -35,7 +34,6 @@ public class NoiseLayer extends Layer {
     public NoiseLayer(String name) {
         super(name);
         setOptions(Options.create()
-                .add("seed", new IntegerOption(0, Integer.MIN_VALUE, Integer.MAX_VALUE))
                 .add("octaves", new IntegerOption(1))
                 .add("frequency", new FloatOption(0))
                 .add("amplitude", new FloatOption(0))
@@ -50,7 +48,8 @@ public class NoiseLayer extends Layer {
 
     @Override
     protected void onPreRender(RenderContext ctx) {
-        mNoiseGenerator = new SimplexNoiseGenerator(seed);
+        mNoiseGenerator = new SimplexNoiseGenerator(ctx.seed);
+        ctx.handleMessage(this, "Preparing noise render with seed:" + ctx.seed);
         noise = new double[(int)ctx.width][(int)ctx.height];
     }
 

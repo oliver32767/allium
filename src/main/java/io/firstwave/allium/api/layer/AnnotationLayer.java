@@ -50,6 +50,9 @@ public class AnnotationLayer extends Layer {
         mAnnotationList.add(annotation);
     }
 
+    public void clearAnnotations() {
+        mAnnotationList.clear();
+    }
 
 
     @Override
