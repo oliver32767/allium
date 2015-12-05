@@ -72,8 +72,8 @@ public class SceneViewerController implements Initializable {
     @FXML
     private Color x4;
 
-    @FXML
-    private Label statusMessage;
+//    @FXML
+//    private Label statusMessage;
 
     @FXML
     private StackPane layerStack;
@@ -404,7 +404,7 @@ public class SceneViewerController implements Initializable {
     private void setStatus(final String status) {
         Logger.info(status);
         FXUtils.runOnMainThread(() -> {
-            statusMessage.setText(status);
+//            statusMessage.setText(status);
             textLog.appendText(status + "\n");
         });
     }

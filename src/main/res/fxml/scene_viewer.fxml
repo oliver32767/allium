@@ -105,7 +105,7 @@
                   </Tab>
                </tabs>
             </TabPane>
-                <AnchorPane maxWidth="400.0" minWidth="36.0" prefWidth="250.0">
+                <AnchorPane maxWidth="800.0" minWidth="36.0" prefWidth="250.0">
                     <children>
                         <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <items>
@@ -160,6 +160,11 @@
                                           </AnchorPane>
                                        </content>
                                     </ScrollPane>
+                                    <AnchorPane>
+                                       <children>
+                                          <ProgressBar fx:id="progress" progress="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                    </AnchorPane>
                                             </children>
                                         </VBox>
                                     </children>
@@ -170,19 +175,5 @@
                 </AnchorPane>
             </items>
         </SplitPane>
-        <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
-            <children>
-                <Label fx:id="statusMessage" maxHeight="1.7976931348623157E308" maxWidth="-1.0" text="Ready" textFill="#515151" HBox.hgrow="ALWAYS">
-                    <font>
-                        <Font size="11.0" fx:id="x3" />
-                    </font>
-                </Label>
-                <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
-            <ProgressBar fx:id="progress" prefWidth="75.0" progress="0.0" />
-            </children>
-            <padding>
-                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
-            </padding>
-        </HBox>
     </children>
 </VBox>
