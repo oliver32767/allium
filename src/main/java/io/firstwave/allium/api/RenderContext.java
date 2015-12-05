@@ -8,11 +8,14 @@ import org.pmw.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by obartley on 12/1/15.
  */
 public final class RenderContext {
+
+    public static final String RESOURCE_RANDOM = RenderContext.class.getCanonicalName() + ".resource";
 
     public final double width;
     public final double height;
@@ -37,6 +40,7 @@ public final class RenderContext {
         mPublisher = publisher;
         mMessageHandler = messageHandler;
         mExceptionHandler = exceptionHandler;
+        putResource(RESOURCE_RANDOM, new Random(seed));
     }
 
 
@@ -104,6 +108,10 @@ public final class RenderContext {
 
     public Object getResource(String key) {
         return mResources.get(key);
+    }
+
+    public Random getRandom() {
+        return (Random) mResources.get(RESOURCE_RANDOM);
     }
 
     public interface Publisher {

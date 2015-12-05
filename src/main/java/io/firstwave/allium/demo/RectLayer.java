@@ -21,7 +21,7 @@ public class RectLayer extends Layer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        final Random r = new Random();
+        final Random r = ctx.getRandom();
 
         final Color c = new Color(r.nextDouble(), r.nextDouble(), r.nextDouble(), 0.5 * r.nextDouble() + 0.5);
 

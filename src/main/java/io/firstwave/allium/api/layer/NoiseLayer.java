@@ -48,9 +48,12 @@ public class NoiseLayer extends Layer {
 
     @Override
     protected void onPreRender(RenderContext ctx) {
-        mNoiseGenerator = new SimplexNoiseGenerator(ctx.seed);
-        ctx.handleMessage(this, "Preparing noise render with seed:" + ctx.seed);
+        mNoiseGenerator = getNoiseGenerator(ctx);
         noise = new double[(int)ctx.width][(int)ctx.height];
+    }
+
+    protected NoiseGenerator getNoiseGenerator(RenderContext ctx) {
+        return new SimplexNoiseGenerator(ctx.getRandom());
     }
 
     @Override
