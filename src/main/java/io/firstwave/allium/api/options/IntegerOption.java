@@ -9,7 +9,7 @@ public class IntegerOption extends Option<Integer> {
     public final int max;
 
     public IntegerOption(int defaultValue) {
-        this(defaultValue, 0, 255);
+        this(defaultValue, -32768, 32767);
     }
 
     public IntegerOption(int defaultValue, int min, int max) {

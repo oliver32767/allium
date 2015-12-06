@@ -50,6 +50,18 @@ public abstract class Curve {
     };
     private static final Map<String, Curve> lookupMap;
 
+    public static final String[] lookupOptions = new String[] {
+            "none",
+            "linear",
+            "cubicOut",
+            "cubicIn",
+            "sineInOut",
+            "linearInv",
+            "cubicOutInv",
+            "cubicInInv",
+            "sineInOutInv"
+    };
+
     static {
         lookupMap = new HashMap<String, Curve>();
         lookupMap.put("none", NONE);

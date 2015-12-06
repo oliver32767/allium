@@ -8,6 +8,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 /**
  * Created by obartley on 12/5/15.
@@ -19,12 +21,18 @@ public class SeparatorBinder extends OptionBinder {
         if (!(option instanceof Separator)) {
             return null;
         }
-        final HBox rv = new HBox(new Label());
+        final Label lbl = new Label();
+        Font f = lbl.getFont();
+        lbl.setFont(Font.font(f.getFamily(), FontWeight.BOLD, f.getSize()));
+
+        final HBox rv = new HBox(lbl);
         rv.setSpacing(5);
+
         javafx.scene.control.Separator sep = new javafx.scene.control.Separator(Orientation.HORIZONTAL);
         rv.setAlignment(Pos.CENTER_LEFT);
         rv.getChildren().add(sep);
-        rv.setHgrow(sep, Priority.ALWAYS);
+
+        HBox.setHgrow(sep, Priority.ALWAYS);
 
         return rv;
     }

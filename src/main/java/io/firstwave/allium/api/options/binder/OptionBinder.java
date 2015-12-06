@@ -14,12 +14,14 @@ public abstract class OptionBinder {
     private static final Map<Class<? extends Option>, OptionBinder> sBinders = new HashMap<>();
 
     static {
+        registerBinder(Separator.class, new SeparatorBinder());
+
         registerBinder(BooleanOption.class, new CheckBoxBinder());
         final SliderBinder sb = new SliderBinder();
         registerBinder(IntegerOption.class, sb);
         registerBinder(FloatOption.class, sb);
         registerBinder(ColorOption.class, new ColorPickerBinder());
-        registerBinder(Separator.class, new SeparatorBinder());
+        registerBinder(SingleChoiceOption.class, new ChoiceBoxBinder());
     }
 
     public static void registerBinder(Class<? extends Option> type, OptionBinder binder) {

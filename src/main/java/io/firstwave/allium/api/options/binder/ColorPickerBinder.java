@@ -27,6 +27,7 @@ public class ColorPickerBinder extends OptionBinder {
         final Label lbl = new Label(option.getKey());
         rv.getChildren().add(lbl);
         final ColorPicker cp = new ColorPicker((Color) option.get());
+        cp.setMinHeight(26);
         cp.valueProperty().addListener((observable, oldValue, newValue) -> {
             option.getEditor().set(newValue);
         });
