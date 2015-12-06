@@ -6,6 +6,7 @@ import io.firstwave.allium.api.options.binder.OptionBinder;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
 import org.pmw.tinylog.Logger;
 
@@ -58,6 +59,10 @@ public class OptionsController {
                     node = getNodeForOption(option);
                     if (node == null) {
                         node = OptionBinder.getBinder(null).bind(option);
+                    } else {
+                        if (option.getDescription() != null) {
+                            Tooltip.install(node, new Tooltip(option.getDescription()));
+                        }
                     }
                 } catch (Throwable tr) {
                     Logger.warn(tr);

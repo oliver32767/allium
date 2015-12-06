@@ -9,8 +9,4 @@ public class ColorOption extends Option<Color> {
     public ColorOption(Color defaultValue) {
         super(Color.class, defaultValue);
     }
-
-    public ColorOption(Color defaultValue, String description) {
-        super(Color.class, defaultValue, description);
-    }
 }

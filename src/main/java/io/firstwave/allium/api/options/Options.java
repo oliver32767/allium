@@ -258,6 +258,10 @@ public final class Options {
         }
 
         public Builder add(String key, Option item) {
+            return add(key, null, item);
+        }
+
+        public Builder add(String key, String description, Option item) {
             if (key == null || item == null) {
                 throw new NullPointerException();
             }
@@ -266,7 +270,10 @@ public final class Options {
             }
             mItems.put(key, item);
             mValues.put(key, item.mDefaultValue);
+
             item.mKey = key;
+            item.mDescription = description;
+
             return this;
         }
 

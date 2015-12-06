@@ -59,7 +59,7 @@ public class NoiseLayer extends Layer {
                 .add("frequency", new FloatOption(1))
                 .add("amplitude", new FloatOption(1))
                 .add("intensity", new FloatOption(1f, 0f, 1f))
-                .add("normalized", new BooleanOption(false))
+                .add("normalized", "Normalize values to [-1..1]", new BooleanOption(false))
 
                 .addSeparator("Interpolation")
                 .add("interpolator", new SingleChoiceOption(Curve.lookupOptions[0], Curve.lookupOptions))

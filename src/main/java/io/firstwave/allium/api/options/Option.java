@@ -9,19 +9,14 @@ public abstract class Option<T> {
 
     final T mDefaultValue;
     final Class<T> mValueType;
-    final String mDescription;
 
     Options mOptions;
     String mKey;
+    String mDescription;
 
     public Option(Class<T> valueType, T defaultValue) {
-        this(valueType, defaultValue, null);
-    }
-
-    public Option(Class<T> valueType, T defaultValue, String description) {
         mValueType = valueType;
         mDefaultValue = defaultValue;
-        mDescription = description;
     }
 
     public final Class<T> getValueType() {
@@ -79,6 +74,10 @@ public abstract class Option<T> {
 
     public final String getKey() {
         return mKey;
+    }
+
+    public final String getDescription() {
+        return mDescription;
     }
 
     public boolean validate(Object value) {
