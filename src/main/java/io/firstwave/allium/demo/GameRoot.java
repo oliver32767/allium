@@ -1,6 +1,7 @@
 package io.firstwave.allium.demo;
 
 import io.firstwave.allium.api.Layer;
+import io.firstwave.allium.api.layer.GridLayer;
 import io.firstwave.allium.api.layer.NoiseLayer;
 
 /**
@@ -8,6 +9,9 @@ import io.firstwave.allium.api.layer.NoiseLayer;
  */
 public class GameRoot extends Layer {
     public GameRoot() {
+        Layer gl = new GridLayer();
+        gl.setVisible(false);
+        addChild(gl);
         addChild(new NoiseLayer());
     }
 }
