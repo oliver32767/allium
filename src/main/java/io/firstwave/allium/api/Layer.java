@@ -28,6 +28,7 @@ public class Layer {
 
     private final SimpleStringProperty mName = new SimpleStringProperty();
     private final SimpleBooleanProperty mVisible = new SimpleBooleanProperty(true);
+    private final SimpleBooleanProperty mExpanded = new SimpleBooleanProperty(true);
 
     private final SimpleObjectProperty<RenderState> mState = new SimpleObjectProperty<>(RenderState.IDLE);
     private final SimpleStringProperty mMessage = new SimpleStringProperty();
@@ -84,7 +85,7 @@ public class Layer {
         return mName;
     }
 
-    public final  boolean isVisible() {
+    public final boolean isVisible() {
         return mVisible.getValue();
     }
 
@@ -105,6 +106,18 @@ public class Layer {
 
     public final BooleanProperty visibleProperty() {
         return mVisible;
+    }
+
+    public final boolean isExpanded() {
+        return mExpanded.getValue();
+    }
+
+    public final void setExpanded(boolean expanded) {
+        mExpanded.setValue(expanded);
+    }
+
+    public final BooleanProperty expandedProperty() {
+        return mExpanded;
     }
 
     public final RenderState getState() {

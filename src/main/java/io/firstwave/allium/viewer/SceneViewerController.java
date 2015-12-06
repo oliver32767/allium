@@ -364,7 +364,12 @@ public class SceneViewerController implements Initializable {
             }
         }
 
-        root.setExpanded(true);
+        root.setExpanded(scene.getRoot().isExpanded());
+        root.expandedProperty().bind(scene.getRoot().expandedProperty());
+
+        // TODO: we should probably add listeners to each node's child property and
+        // update the scene tree only when a modification is observed
+
         addSceneNode(root);
 
     }
@@ -372,7 +377,8 @@ public class SceneViewerController implements Initializable {
     private void addSceneNode(TreeItem<Layer> root) {
         for (Layer node : root.getValue().getChildNodes()) {
             final TreeItem<Layer> treeNode = new TreeItem<>(node);
-            treeNode.setExpanded(true);
+            treeNode.setExpanded(node.isExpanded());
+            treeNode.expandedProperty().bind(node.expandedProperty());
             root.getChildren().add(treeNode);
             Logger.debug("adding node:" + node.getName());
             if (node.getChildCount() > 0) {

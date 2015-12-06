@@ -1,5 +1,6 @@
 package io.firstwave.allium.api;
 
+import io.firstwave.allium.api.inject.Injector;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -152,8 +153,15 @@ public abstract class Scene {
         return mRenderContext;
     }
 
+    /**
+     * Called during the scene's pre render pass. This is called in the main thread, so use this callback
+     * to make any modifications you need to make to the layer tree.
+     *
+     * The default implementation performs an injection (see {@link Injector#inject(Object, Layer)})
+     * @param ctx
+     */
     protected void onPreRender(RenderContext ctx) {
-
+        Injector.inject(this, mRoot);
     }
 
     protected void onRender(RenderContext ctx) {
