@@ -426,7 +426,9 @@ public class SceneViewerController implements Initializable {
                 (ctx, source, tr) -> setStatus("[" + source + "] " + tr.toString()));
         progress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         mScene.render(context);
-
+        // TODO: this automatically resets the scene tree every time, so we need
+        // a better way of detecting changes to the layer tree
+        updateSceneTree(mScene);
     }
 
     private void publish(Layer layer, Canvas canvas) {
