@@ -29,12 +29,11 @@ public class NoiseLayer extends Layer {
     @Inject private int octaves;
     @Inject private float frequency;
     @Inject private float amplitude;
+    @Inject private float intensity;
 
     @Inject private float noiseScale;
 
     @Inject private boolean normalized;
-
-    @Inject private float intensity;
     @Inject private float thresholdMin;
     @Inject private float thresholdMax;
     @Inject private String interpolator;
@@ -59,11 +58,11 @@ public class NoiseLayer extends Layer {
                 .add("octaves", new IntegerOption(1, 1, 32))
                 .add("frequency", new FloatOption(1))
                 .add("amplitude", new FloatOption(1))
+                .add("intensity", new FloatOption(1f, 0f, 1f))
                 .add("normalized", new BooleanOption(false))
 
                 .addSeparator("Interpolation")
                 .add("interpolator", new SingleChoiceOption(Curve.lookupOptions[0], Curve.lookupOptions))
-                .add("intensity", new FloatOption(1f, 0f, 1f))
                 .add("noiseScale", new FloatOption(0.1f, 0.01f, 1f))
 
                 .addSeparator("Visualisation")
@@ -81,10 +80,16 @@ public class NoiseLayer extends Layer {
         mSeedTransformer = seedTransformer;
     }
 
-    @Override
-    protected void onPreRender(RenderContext ctx) {
-        super.onPreRender(ctx);
+    public double getValue(int x, int y) {
+        try {
+            return interpolation[x][y];
+        } catch (IndexOutOfBoundsException | NullPointerException e) {
+            return 0;
+        }
+    }
 
+    @Override
+    protected void onRender(RenderContext ctx) {
         long seed;
         if (mSeedTransformer == null) {
             seed = ctx.seed;
@@ -109,18 +114,6 @@ public class NoiseLayer extends Layer {
         noise = getNoise((int) (getScene().getWidth() / scaleX), (int) (getScene().getHeight() / scaleY), mNoiseGenerator);
         interpolation = getInterpolation(noise, (int) getScene().getWidth(), (int) getScene().getHeight(),
                 Interpolator.CUBIC, Curve.lookup(interpolator), intensity);
-    }
-
-    public double getValue(int x, int y) {
-        try {
-            return interpolation[x][y];
-        } catch (IndexOutOfBoundsException | NullPointerException e) {
-            return 0;
-        }
-    }
-
-    @Override
-    protected void onRender(RenderContext ctx) {
 
         final PixelWriter pw = getCanvas().getGraphicsContext2D().getPixelWriter();
 
