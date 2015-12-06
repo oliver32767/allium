@@ -82,7 +82,7 @@ public abstract class Option<T> {
     }
 
     public boolean validate(Object value) {
-        return value != null && mValueType.isAssignableFrom(value.getClass());
+        return value == null || mValueType.isAssignableFrom(value.getClass());
     }
 
     public boolean equals(T oldValue, T newValue) {

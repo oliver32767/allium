@@ -48,12 +48,12 @@ public class SliderBinder extends OptionBinder {
     public void update(Node node, Option option) {
         final Pane pane = (Pane) node;
 
-
         if (option instanceof IntegerOption) {
             ((Slider) pane.getChildren().get(1)).setValue(option.getInt());
             ((Label) pane.getChildren().get(0)).setText(option.getKey() + ": " + option.getInt());
         } else if (option instanceof FloatOption) {
             ((Slider) pane.getChildren().get(1)).setValue(option.getFloat());
+            ((Label) pane.getChildren().get(0)).setText(option.getKey() + ": " + option.getFloat());
         }
     }
 }
