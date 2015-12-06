@@ -82,11 +82,11 @@
                      <content>
                             <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" prefHeight="-1.0" prefWidth="-1.0">
                                 <content>
-                                    <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0">
-                                        <children>
+                              <Group autoSizeChildren="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
                                             <StackPane fx:id="layerStack" prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                        </children>
-                                    </AnchorPane>
+                                 </children>
+                              </Group>
                                 </content>
                            <cursor>
                               <Cursor fx:constant="CROSSHAIR" />

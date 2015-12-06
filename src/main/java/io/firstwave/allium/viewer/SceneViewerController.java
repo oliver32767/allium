@@ -74,9 +74,6 @@ public class SceneViewerController implements Initializable {
     @FXML
     private Color x4;
 
-//    @FXML
-//    private Label statusMessage;
-
     @FXML
     private StackPane layerStack;
 
@@ -107,6 +104,8 @@ public class SceneViewerController implements Initializable {
     private Stage mStage;
     private Scene mScene;
     private Class<? extends Scene> mSceneType;
+
+    private double mScrollH, mScrollV;
 
     private final SimpleBooleanProperty mLocked = new SimpleBooleanProperty(false);
 
@@ -394,8 +393,11 @@ public class SceneViewerController implements Initializable {
             }
         }
 
-
         mOptionsController.apply();
+
+        mScrollH = scrollPane.getHvalue();
+        mScrollV = scrollPane.getVvalue();
+
         layerStack.getChildren().clear();
 
         final RenderContext context = new RenderContext(
@@ -422,8 +424,16 @@ public class SceneViewerController implements Initializable {
     }
 
     private void publish(Layer layer, Canvas canvas) {
+        // TODO: ordering within the stack
         Logger.debug("published:" + layer);
         layerStack.getChildren().add(canvas);
+
+        if (mScrollV >= 0 || mScrollH >= 0) {
+            scrollPane.setHvalue(mScrollH);
+            scrollPane.setVvalue(mScrollV);
+            mScrollV = -1;
+            mScrollH = -1;
+        }
     }
 
     private void setBackgroundColor(Color color) {
@@ -442,7 +452,6 @@ public class SceneViewerController implements Initializable {
     private void setStatus(final String status) {
         Logger.info(status);
         FXUtils.runOnMainThread(() -> {
-//            statusMessage.setText(status);
             textLog.appendText(status + "\n");
         });
     }
