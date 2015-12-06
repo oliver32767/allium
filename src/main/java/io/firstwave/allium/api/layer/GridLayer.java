@@ -59,8 +59,11 @@ public class GridLayer extends Layer {
         int xInt = 0;
         int yInt = 0;
 
-        for (int y = 0; y < ctx.height; y += minorInterval) {
-            for (int x = 0; x < ctx.width; x += minorInterval) {
+        final double w = getScene().getWidth();
+        final double h = getScene().getHeight();
+        
+        for (int y = 0; y < h; y += minorInterval) {
+            for (int x = 0; x < w; x += minorInterval) {
                 if (majorInterval > 0 && xInt++ > majorInterval) {
                     xInt = 0;
                     gc.setStroke(majorColor);
@@ -69,7 +72,7 @@ public class GridLayer extends Layer {
                     gc.setStroke(minorColor);
                     gc.setLineWidth(minorStrokeWidth);
                 }
-                gc.strokeLine(x, 0, x, ctx.height);
+                gc.strokeLine(x, 0, x, h);
             }
             if (majorInterval > 0 && yInt++ > majorInterval) {
                 yInt = 0;
@@ -79,7 +82,7 @@ public class GridLayer extends Layer {
                 gc.setStroke(minorColor);
                 gc.setLineWidth(minorStrokeWidth);
             }
-            gc.strokeLine(0, y, ctx.width, y);
+            gc.strokeLine(0, y, w, y);
         }
     }
 }

@@ -6,21 +6,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import org.pmw.tinylog.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 /**
  * Created by obartley on 12/1/15.
  */
 public final class RenderContext {
-
-    public static final String RESOURCE_RANDOM = RenderContext.class.getCanonicalName() + ".resource";
-
-    public final double width;
-    public final double height;
-    public final long seed;
-
 
     private final Publisher mPublisher;
     private final MessageHandler mMessageHandler;
@@ -30,17 +19,11 @@ public final class RenderContext {
     private final IntegerProperty mPublishCount = new SimpleIntegerProperty(0);
     private final SimpleBooleanProperty mIsActive = new SimpleBooleanProperty(false);
 
-    private final Map<String, Object> mResources = new HashMap<>();
 
-
-    public RenderContext(long seed, double width, double height, Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
-        this.seed = seed;
-        this.width = width;
-        this.height = height;
+    public RenderContext(Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
         mPublisher = publisher;
         mMessageHandler = messageHandler;
         mExceptionHandler = exceptionHandler;
-        putResource(RESOURCE_RANDOM, new Random(seed));
     }
 
 
@@ -95,23 +78,6 @@ public final class RenderContext {
 
     public BooleanProperty activeProperty() {
         return mIsActive;
-    }
-
-    @Override
-    public String toString() {
-        return RenderContext.class.getSimpleName() + " [" + width + " x " + height + " : " + seed + "]";
-    }
-
-    public void putResource(String key, Object value) {
-        mResources.put(key, value);
-    }
-
-    public Object getResource(String key) {
-        return mResources.get(key);
-    }
-
-    public Random getRandom() {
-        return (Random) mResources.get(RESOURCE_RANDOM);
     }
 
     public interface Publisher {

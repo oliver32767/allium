@@ -21,12 +21,15 @@ public class RectLayer extends Layer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        final Random r = ctx.getRandom();
+        final Random r = getScene().getRandom();
 
         final Color c = new Color(r.nextDouble(), r.nextDouble(), r.nextDouble(), 0.5 * r.nextDouble() + 0.5);
 
         gc(this).setFill(c);
-        gc(this).fillRect(ctx.width * r.nextDouble(), ctx.height * r.nextDouble(), ctx.width * r.nextDouble(), ctx.height * r.nextDouble());
+        gc(this).fillRect(getScene().getWidth() * r.nextDouble(),
+                getScene().getHeight() * r.nextDouble(),
+                getScene().getWidth() * r.nextDouble(),
+                getScene().getHeight() * r.nextDouble());
         publish();
     }
 }

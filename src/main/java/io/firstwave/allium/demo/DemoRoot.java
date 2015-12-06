@@ -88,7 +88,7 @@ public class DemoRoot extends Layer {
                         .setScale(0.5)
                         .setColor(Color.PINK)
         );
-        anno.addAnnotation(new AnnotationLayer.Annotation("seed:" + ctx.seed, 128, 128));
+        anno.addAnnotation(new AnnotationLayer.Annotation("seed:" + getScene().getSeed(), 128, 128));
     }
 
     @Override

@@ -46,7 +46,7 @@ public class TroubleMaker extends Layer {
 
     @Override
     protected Canvas onCreateCanvas(RenderContext ctx) {
-        return new Canvas(ctx.width / 2, ctx.height / 2);
+        return new Canvas(getScene().getWidth() / 2, getScene().getHeight() / 2);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class TroubleMaker extends Layer {
             e.printStackTrace();
         }
         gc(this).setFill(Color.PINK);
-        gc(this).fillRect(0, 0, ctx.width / 2, ctx.height / 2);
+        gc(this).fillRect(0, 0, getScene().getWidth() / 2, getScene().getHeight() / 2);
         throw new RuntimeException();
     }
 }

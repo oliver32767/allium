@@ -31,8 +31,6 @@ public class NoiseLayer extends Layer {
     @Inject boolean normalized;
     @Inject float noiseScale;
 
-    private NoiseGeneratorFactory mNoiseGeneratorFactory;
-
 
     public NoiseLayer() {
         this(null);
@@ -50,17 +48,12 @@ public class NoiseLayer extends Layer {
         );
     }
 
-    public void setNoiseGeneratorFactory(NoiseGeneratorFactory noiseGeneratorFactory) {
-        mNoiseGeneratorFactory = noiseGeneratorFactory;
-    }
-
-
 
     @Override
     protected void onPreRender(RenderContext ctx) {
         super.onPreRender(ctx);
-        mNoiseGenerator = getNoiseGenerator(ctx);
-        noise = new double[(int)ctx.width][(int)ctx.height];
+        mNoiseGenerator = new SimplexNoiseGenerator(getScene().getRandom());
+        noise = new double[(int)getScene().getWidth()][(int)getScene().getHeight()];
         final long startTime = System.currentTimeMillis();
         for (int x = 0; x < noise.length; x++) {
             for (int y = 0; y < noise[x].length; y++) {
@@ -73,14 +66,6 @@ public class NoiseLayer extends Layer {
         }
         final float elapsed = (float) (System.currentTimeMillis() - startTime) / 1000;
         ctx.handleMessage(this, String.format("generated noise in %.4f second(s)\n", elapsed));
-    }
-
-    protected NoiseGenerator getNoiseGenerator(RenderContext ctx) {
-        NoiseGenerator rv = null;
-        if (mNoiseGeneratorFactory != null) {
-            rv = mNoiseGeneratorFactory.getNoiseGenerator(ctx);
-        }
-        return (rv == null) ? new SimplexNoiseGenerator(ctx.getRandom()) : rv;
     }
 
     @Override
@@ -147,7 +132,4 @@ public class NoiseLayer extends Layer {
         return d;
     }
 
-    public interface NoiseGeneratorFactory {
-        NoiseGenerator getNoiseGenerator(RenderContext ctx);
-    }
 }

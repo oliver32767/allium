@@ -9,6 +9,7 @@ import org.pmw.tinylog.Logger;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Random;
 
 /**
  * Created by obartley on 12/1/15.
@@ -16,6 +17,9 @@ import java.io.StringWriter;
 public abstract class Scene {
     
     private Layer mRoot;
+
+    private Random mRandom;
+    private long mSeed;
 
     private double mWidth = 0;
     private double mHeight = 0;
@@ -56,6 +60,14 @@ public abstract class Scene {
         mBackgroundColor.setValue(color);
     }
 
+    public final long getSeed() {
+        return mSeed;
+    }
+
+    public final Random getRandom() {
+        return mRandom;
+    }
+
     public ObservableValue<Color> backgroundColorProperty() {
         return mBackgroundColor;
     }
@@ -69,16 +81,20 @@ public abstract class Scene {
     /**
      * Scenes should not call this method directly, the viewer will handle this one dude
      */
-    public final void render(final RenderContext ctx) {
+    public final void render(long seed, final RenderContext ctx) {
         if (mRenderContext.getValue() != null) {
             Logger.debug("Render in progress -- skipping");
             return;
         }
+
+        mSeed = seed;
+        mRandom = new Random(seed);
+
         mRenderContext.setValue(ctx);
 
         final long startTime = System.currentTimeMillis();
 
-        ctx.handleMessage("START", "→ Starting render with " + ctx);
+        ctx.handleMessage("START", "→ Starting render of seed [" + seed + "]");
 
         // pre render on main thread
         onPreRender(ctx);

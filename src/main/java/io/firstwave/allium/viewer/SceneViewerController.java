@@ -5,7 +5,7 @@ import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
 import io.firstwave.allium.api.options.Options;
-import io.firstwave.allium.demo.DemoScene;
+import io.firstwave.allium.demo.GameScene;
 import io.firstwave.allium.utils.FXUtils;
 import io.firstwave.allium.viewer.ui.LayerNameTreeTableCell;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -279,7 +279,7 @@ public class SceneViewerController implements Initializable {
 
     private void open() {
         // TODO: implement file picker stuff
-        setSceneType(DemoScene.class);
+        setSceneType(GameScene.class);
     }
 
     private void setSceneType(Class<? extends Scene> sceneType) {
@@ -399,7 +399,6 @@ public class SceneViewerController implements Initializable {
         layerStack.getChildren().clear();
 
         final RenderContext context = new RenderContext(
-                seed, mScene.getWidth(), mScene.getHeight(),
                 (ctx, layer) -> {
                     // called on the render thread, we need to push it back to the main thread
                     if (layer != null) {
@@ -418,7 +417,7 @@ public class SceneViewerController implements Initializable {
                 (ctx, source, message) -> setStatus("[" + source + "] " + message),
                 (ctx, source, tr) -> setStatus("[" + source + "] " + tr.toString()));
         progress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
-        mScene.render(context);
+        mScene.render(seed, context);
 
     }
 

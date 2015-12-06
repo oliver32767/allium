@@ -64,7 +64,6 @@ public class Layer {
     }
 
 
-
     public String getName() {
         return mName.getValue();
     }
@@ -158,6 +157,9 @@ public class Layer {
     }
 
     protected Scene getScene() {
+        if (mScene == null && mParent != null) {
+            return mParent.getScene();
+        }
         return mScene;
     }
 
@@ -167,8 +169,10 @@ public class Layer {
     public final Layer addChild(Layer child) {
         mThreadEnforcer.enforce();
         child.removeFromParent();
+
         child.mParent = this;
         mChildNodes.add(child);
+
         return child;
     }
 
@@ -178,8 +182,11 @@ public class Layer {
     public final Layer addChild(int index, Layer child) {
         mThreadEnforcer.enforce();
         child.removeFromParent();
+
         child.mParent = this;
+        child.setScene(getScene());
         mChildNodes.add(index, child);
+
         return child;
     }
 
@@ -207,6 +214,7 @@ public class Layer {
 
     private void removeChildInternal(int index) {
         mChildNodes.get(index).mParent = null;
+        mChildNodes.get(index).mScene = null;
         mChildNodes.remove(index);
     }
 
@@ -232,8 +240,8 @@ public class Layer {
         mState.setValue(LayerState.IDLE);
         mRenderContext = ctx;
         try {
-            mCanvas = onCreateCanvas(ctx);
             onPreRender(ctx);
+            mCanvas = onCreateCanvas(ctx);
         } catch (Throwable tr) {
             ctx.handleException(this, tr);
             mCanvas = null;
@@ -243,7 +251,7 @@ public class Layer {
     }
 
     protected Canvas onCreateCanvas(RenderContext ctx) {
-        return new Canvas(ctx.width, ctx.height);
+        return new Canvas(getScene().getWidth(), getScene().getHeight());
     }
 
     public final Canvas getCanvas() {
