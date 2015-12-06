@@ -68,7 +68,32 @@ public abstract class Scene {
     protected abstract Layer onCreate();
 
     /**
-     * Scenes should not call this method directly, the viewer will handle this one dude
+     * This method, along with {@link Layer#render(RenderContext)} and {@link Layer#preRender(RenderContext)} contains
+     * the logic for handling the rendering sequence. You shouldn't invoke this method directly, the viewer will call
+     * this when the user has requested a render.
+     *
+     * The rendering sequence is broken up into two phases: pre-render and render.
+     *
+     * Each phase follows the same pattern, with the difference being that pre-render occurs on the main thread allowing
+     * you an opportunity to modify your layer tree before the render pass begins. Once the pre-render pass is complete,
+     * a worker thread will be spun up to handle the potentially long-running render pass. You can not modify your
+     * layer tree during this phase. Most layers will not have an onPreRender implementation.
+     *
+     * The sequence is as follows:
+     *
+     * {@link Scene#onPreRender(RenderContext)} is called.
+     *
+     * beginning with the root node:
+     *  call {@link Layer#preRender(RenderContext)} which:
+     *      dispatches a call to {@link Layer#onPreRender(RenderContext)}
+     *      calls {@link Layer#preRender(RenderContext)} on each of its children
+     *
+     * Each Layer has an associated state which describes its state in this rendering sequence, see {@link RenderState}
+     *
+     * By default, a layer will not complete a phase until all of its child layers have also completed, though
+     * if you need more complex layer dependencies, you can manually trigger a preRender or render by calling the relevant
+     * method on a layer yourself.
+     *
      */
     public final void render(final RenderContext ctx) {
         if (mRenderContext.getValue() != null) {
@@ -85,7 +110,7 @@ public abstract class Scene {
         // pre render on main thread
         onPreRender(ctx);
         if (mRoot != null) {
-            mRoot.each(layer -> layer.preRender(ctx));
+            mRoot.preRender(ctx);
         }
 
         final Task<Void> renderTask = new Task<Void>() {
@@ -93,8 +118,7 @@ public abstract class Scene {
             protected Void call() throws Exception {
                 onRender(ctx);
                 if (mRoot != null) {
-                    mRoot.each(layer -> layer.render(ctx));
-                    mRoot.each(Layer::publish);
+                    mRoot.render(ctx);
                 }
                 return null;
             }

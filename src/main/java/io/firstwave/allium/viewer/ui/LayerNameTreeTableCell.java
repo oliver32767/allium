@@ -1,7 +1,7 @@
 package io.firstwave.allium.viewer.ui;
 
 import io.firstwave.allium.api.Layer;
-import io.firstwave.allium.api.LayerState;
+import io.firstwave.allium.api.RenderState;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
@@ -21,7 +21,7 @@ public class LayerNameTreeTableCell extends TextFieldTreeTableCell<Layer, Layer>
     }
 
 
-    private ChangeListener<LayerState> mLayerStateChangeListener;
+    private ChangeListener<RenderState> mLayerStateChangeListener;
     private Layer mCurrent;
 
 
@@ -58,7 +58,6 @@ public class LayerNameTreeTableCell extends TextFieldTreeTableCell<Layer, Layer>
             case ERROR:
                 c = Color.RED;
                 break;
-            case IDLE:
             default:
                 c = Color.GRAY;
         }

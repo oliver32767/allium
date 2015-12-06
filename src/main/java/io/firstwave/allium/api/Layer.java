@@ -2,6 +2,7 @@ package io.firstwave.allium.api;
 
 import io.firstwave.allium.api.inject.Injector;
 import io.firstwave.allium.api.options.Options;
+import io.firstwave.allium.utils.FXUtils;
 import io.firstwave.allium.utils.ThreadEnforcer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -11,7 +12,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
-import org.pmw.tinylog.Logger;
 
 /**
  * Created by obartley on 12/1/15.
@@ -29,7 +29,7 @@ public class Layer {
     private final SimpleStringProperty mName = new SimpleStringProperty();
     private final SimpleBooleanProperty mVisible = new SimpleBooleanProperty(true);
 
-    private final SimpleObjectProperty<LayerState> mState = new SimpleObjectProperty<>(LayerState.IDLE);
+    private final SimpleObjectProperty<RenderState> mState = new SimpleObjectProperty<>(RenderState.IDLE);
     private final SimpleStringProperty mMessage = new SimpleStringProperty();
 
     ThreadEnforcer mThreadEnforcer = ThreadEnforcer.MAIN;
@@ -107,13 +107,16 @@ public class Layer {
         return mVisible;
     }
 
-    public final ObservableValue<LayerState> stateProperty() {
+    public final RenderState getState() {
+        return mState.getValue();
+    }
+
+    public final ObservableValue<RenderState> stateProperty() {
         return mState;
     }
 
     protected void setMessage(String message) {
-        Logger.warn(message);
-        mMessage.setValue(message);
+        FXUtils.runOnMainThread(() -> mMessage.setValue(message));
     }
 
     public final ObservableValue<String> messageProperty() {
@@ -187,6 +190,12 @@ public class Layer {
         child.setScene(getScene());
         mChildNodes.add(index, child);
 
+        // if the layer is added during pre render, we need to ensure the child's
+        // pre render pass is completed as well
+        if (getState() == RenderState.PREPARING && mRenderContext != null) {
+            child.preRender(mRenderContext);
+        }
+
         return child;
     }
 
@@ -235,43 +244,88 @@ public class Layer {
 
     // RENDER API //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    final void preRender(RenderContext ctx) {
+    /**
+     * Prepare this layer and its children for a render pass.
+     * @param ctx
+     */
+    public final void preRender(RenderContext ctx) {
         ThreadEnforcer.MAIN.enforce();
-        mState.setValue(LayerState.IDLE);
+        if (mRenderContext != null || getState() == RenderState.PREPARING) {
+            return;
+        }
+        mState.setValue(RenderState.PREPARING);
         mRenderContext = ctx;
+
+
         try {
             onPreRender(ctx);
             mCanvas = onCreateCanvas(ctx);
         } catch (Throwable tr) {
             ctx.handleException(this, tr);
             mCanvas = null;
-            mState.setValue(LayerState.ERROR);
+            mState.setValue(RenderState.ERROR);
         }
+
+        for (Layer child : mChildNodes) {
+            child.preRender(ctx);
+        }
+        mState.setValue(RenderState.READY);
+
         ctx.onPreRenderComplete(this);
     }
 
+    /**
+     * Override to provide a custom canvas to your layer for rendering. While not required,
+     * you should ensure that the returned canvas has the same dimensions as your scene.
+     * Occurs during pre render
+     *
+     * @param ctx
+     * @return
+     */
     protected Canvas onCreateCanvas(RenderContext ctx) {
         return new Canvas(getScene().getWidth(), getScene().getHeight());
     }
 
+    /**
+     * Return the canvas created in this layer's pre render pass. May be null.
+     * @return
+     */
     public final Canvas getCanvas() {
         return mCanvas;
     }
 
+    /**
+     * Called during the scene's pre render pass. This is called in the main thread, so use this callback
+     * to make any modifications you need to make to the layer tree.
+     *
+     * The default implementation performs an injection (see {@link Injector#inject(Object, Layer)})
+     * @param ctx
+     */
     protected void onPreRender(RenderContext ctx) {
         Injector.inject(this, this);
     }
 
-    final void render(RenderContext ctx) {
+    /**
+     * Perform a render pass of this layer and all of its children
+     * @param ctx
+     */
+    public final void render(RenderContext ctx) {
         ThreadEnforcer.BACKGROUND.enforce();
-        if (mState.getValue() == LayerState.IDLE) {
-            mState.setValue(LayerState.RENDERING);
-            try {
-                onRender(ctx);
-            } catch (Throwable tr) {
-                ctx.handleException(this, tr);
-                mState.setValue(LayerState.ERROR);
-            }
+        if (getState() != RenderState.READY) {
+            // already finished
+            return;
+        }
+
+        mState.setValue(RenderState.RENDERING);
+        try {
+            onRender(ctx);
+        } catch (Throwable tr) {
+            mState.setValue(RenderState.ERROR);
+            ctx.handleException(this, tr);
+        }
+
+        for (Layer child : mChildNodes) {
+            child.render(ctx);
         }
         publish();
     }
@@ -279,35 +333,23 @@ public class Layer {
     protected void onRender(RenderContext ctx) {}
 
     public final void publish() {
-        if (mState.getValue() != LayerState.RENDERING &&
-                mState.getValue() != LayerState.ERROR) {
+        if (mRenderContext == null) {
             return;
         }
+
         if (mCanvas != null) {
             mCanvas.visibleProperty().bind(visibleProperty());
             mRenderContext.publish(this);
         }
 
-        if (mState.getValue() != LayerState.ERROR) {
-            mState.setValue(LayerState.PUBLISHED);
+        if (getState() != RenderState.ERROR) {
+            mState.setValue(RenderState.PUBLISHED);
         }
 
         mRenderContext = null;
         mCanvas = null;
     }
 
-    // VISITOR API /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    void each(Visitor visitor) {
-        visitor.visit(this);
-        for (Layer child : mChildNodes) {
-            child.each(visitor);
-        }
-    }
-
-    interface Visitor {
-        void visit(Layer layer);
-    }
 
     @Override
     public String toString() {

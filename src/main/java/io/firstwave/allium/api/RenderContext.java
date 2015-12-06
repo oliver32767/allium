@@ -1,10 +1,11 @@
 package io.firstwave.allium.api;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import org.pmw.tinylog.Logger;
+
+import java.util.Random;
 
 /**
  * Created by obartley on 12/1/15.
@@ -12,6 +13,7 @@ import org.pmw.tinylog.Logger;
 public final class RenderContext {
 
     public final long seed;
+
 
     private final Publisher mPublisher;
     private final MessageHandler mMessageHandler;
@@ -21,14 +23,23 @@ public final class RenderContext {
     private final IntegerProperty mPublishCount = new SimpleIntegerProperty(0);
     private final SimpleBooleanProperty mIsActive = new SimpleBooleanProperty(false);
 
+    private Random mRandom;
 
     public RenderContext(long seed, Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
         this.seed = seed;
+        mRandom = new Random(seed);
         mPublisher = publisher;
         mMessageHandler = messageHandler;
         mExceptionHandler = exceptionHandler;
     }
 
+    public Random getRandom() {
+        return mRandom;
+    }
+
+    void onPreRenderComplete(Layer layer) {
+        mLayerCount.setValue(mLayerCount.getValue() + 1);
+    }
 
     void publish(Layer layer) {
         if (mPublisher != null) {
@@ -55,10 +66,6 @@ public final class RenderContext {
         }
     }
 
-    void onPreRenderComplete(Layer layer) {
-        mLayerCount.setValue(mLayerCount.getValue() + 1);
-    }
-
     public int getLayerCount() {
         return mLayerCount.getValue();
     }
@@ -75,13 +82,6 @@ public final class RenderContext {
         return mPublishCount;
     }
 
-    final void setActive(boolean active) {
-        mIsActive.setValue(active);
-    }
-
-    public BooleanProperty activeProperty() {
-        return mIsActive;
-    }
 
     @Override
     public String toString() {
