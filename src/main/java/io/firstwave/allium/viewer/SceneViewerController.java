@@ -1,6 +1,7 @@
 package io.firstwave.allium.viewer;
 
 import io.firstwave.allium.Const;
+import io.firstwave.allium.Prefs;
 import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.Scene;
@@ -199,7 +200,7 @@ public class SceneViewerController implements Initializable {
         menuNoZoom.setUserData(0);
         menuNoZoom.setOnAction(zoom);
 
-        menuTheme.setOnAction(event -> setTheme(menuTheme.isSelected()));
+        menuTheme.setOnAction(event -> setDarkTheme(menuTheme.isSelected()));
 
         menuQuit.setOnAction(event -> {
             if (getStage() != null) {
@@ -265,7 +266,7 @@ public class SceneViewerController implements Initializable {
         }
     }
 
-    private void setTheme(boolean dark) {
+    public void setDarkTheme(boolean dark) {
         if (mStage == null) {
             return;
         }
@@ -274,6 +275,11 @@ public class SceneViewerController implements Initializable {
         } else {
             mStage.getScene().getStylesheets().remove("/styles/dark.css");
         }
+
+        if (dark != menuTheme.isSelected()) {
+            menuTheme.setSelected(dark);
+        }
+        Prefs.setDarkTheme(dark);
     }
 
     private void open() {

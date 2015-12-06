@@ -25,14 +25,19 @@ public class Allium extends Application {
         final Parent root = loader.load();
         final SceneViewerController controller = loader.getController();
         controller.setStage(primaryStage);
+
         Scene scene = new Scene(root, 600, 400);
+
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(event -> Platform.exit());
+        primaryStage.setOnCloseRequest(event -> {
+            Platform.exit();
+        });
         primaryStage.getIcons().addAll(new Image("/images/icon_512.png"));
 
 
         configureStageForOSX(primaryStage);
 
+        controller.setDarkTheme(Prefs.isDarkTheme());
         primaryStage.show();
     }
 

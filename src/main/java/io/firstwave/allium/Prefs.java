@@ -8,6 +8,16 @@ import java.util.prefs.Preferences;
  */
 public class Prefs {
 
+    public static boolean isDarkTheme() {
+        Preferences prefs = Preferences.userNodeForPackage(Allium.class);
+        return prefs.getBoolean("darkTheme", false);
+    }
+
+    public static void setDarkTheme(boolean darkTheme) {
+        Preferences prefs = Preferences.userNodeForPackage(Allium.class);
+        prefs.putBoolean("darkTheme", darkTheme);
+    }
+
     public static File getLastPath() {
         Preferences prefs = Preferences.userNodeForPackage(Allium.class);
         String filePath = prefs.get("lastPath", null);
@@ -18,10 +28,10 @@ public class Prefs {
         }
     }
 
-    public static void setLastPath(File file) {
+    public static void setLastPath(File lastPath) {
         Preferences prefs = Preferences.userNodeForPackage(Allium.class);
-        if (file != null) {
-            prefs.put("lastPath", file.getPath());
+        if (lastPath != null) {
+            prefs.put("lastPath", lastPath.getPath());
         } else {
             prefs.remove("lastPath");
         }
