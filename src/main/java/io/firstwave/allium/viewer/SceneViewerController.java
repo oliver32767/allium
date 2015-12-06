@@ -406,7 +406,7 @@ public class SceneViewerController implements Initializable {
 
         layerStack.getChildren().clear();
 
-        final RenderContext context = new RenderContext(
+        final RenderContext context = new RenderContext(seed,
                 (ctx, layer) -> {
                     // called on the render thread, we need to push it back to the main thread
                     if (layer != null) {
@@ -425,7 +425,7 @@ public class SceneViewerController implements Initializable {
                 (ctx, source, message) -> setStatus("[" + source + "] " + message),
                 (ctx, source, tr) -> setStatus("[" + source + "] " + tr.toString()));
         progress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
-        mScene.render(seed, context);
+        mScene.render(context);
 
     }
 

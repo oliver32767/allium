@@ -4,6 +4,7 @@ import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.inject.Inject;
 import io.firstwave.allium.api.options.*;
+import io.firstwave.allium.api.utils.Function1;
 import io.firstwave.allium.gen.Curve;
 import io.firstwave.allium.gen.Interpolator;
 import io.firstwave.allium.gen.RadialGradient;
@@ -44,6 +45,7 @@ public class NoiseLayer extends Layer {
 
     @Inject private boolean flat;
 
+    private Function1<Long, Long> mSeedTransformer;
 
     public NoiseLayer() {
         this(null);
@@ -75,13 +77,30 @@ public class NoiseLayer extends Layer {
         );
     }
 
+    public void setSeedTransformer(Function1<Long, Long> seedTransformer) {
+        mSeedTransformer = seedTransformer;
+    }
+
     @Override
     protected void onPreRender(RenderContext ctx) {
         super.onPreRender(ctx);
-        if ("simplex".equals(generator)) {
-            mNoiseGenerator = new SimplexNoiseGenerator(getScene().getRandom());
+
+        long seed;
+        if (mSeedTransformer == null) {
+            seed = ctx.seed;
         } else {
-            mNoiseGenerator = new PerlinNoiseGenerator(getScene().getRandom());
+            final Long s = mSeedTransformer.call(ctx.seed);
+            if (s == null) {
+                seed = ctx.seed;
+            } else {
+                seed = s;
+            }
+        }
+
+        if ("simplex".equals(generator)) {
+            mNoiseGenerator = new SimplexNoiseGenerator(seed);
+        } else {
+            mNoiseGenerator = new PerlinNoiseGenerator(seed);
         }
 
         float scaleX = (float) getScene().getWidth() * noiseScale;

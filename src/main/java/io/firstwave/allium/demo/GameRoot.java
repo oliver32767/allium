@@ -12,6 +12,7 @@ public class GameRoot extends Layer {
         Layer gl = new GridLayer();
         gl.setVisible(false);
         addChild(gl);
-        addChild(new NoiseLayer());
+        NoiseLayer nl = new NoiseLayer();
+        addChild(nl);
     }
 }

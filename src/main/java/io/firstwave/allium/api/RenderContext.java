@@ -11,6 +11,8 @@ import org.pmw.tinylog.Logger;
  */
 public final class RenderContext {
 
+    public final long seed;
+
     private final Publisher mPublisher;
     private final MessageHandler mMessageHandler;
     private final ExceptionHandler mExceptionHandler;
@@ -20,7 +22,8 @@ public final class RenderContext {
     private final SimpleBooleanProperty mIsActive = new SimpleBooleanProperty(false);
 
 
-    public RenderContext(Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
+    public RenderContext(long seed, Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
+        this.seed = seed;
         mPublisher = publisher;
         mMessageHandler = messageHandler;
         mExceptionHandler = exceptionHandler;
@@ -78,6 +81,11 @@ public final class RenderContext {
 
     public BooleanProperty activeProperty() {
         return mIsActive;
+    }
+
+    @Override
+    public String toString() {
+        return RenderContext.class.getSimpleName() + " [" + seed + "]";
     }
 
     public interface Publisher {
