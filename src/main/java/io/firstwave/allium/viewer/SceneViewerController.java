@@ -379,10 +379,6 @@ public class SceneViewerController implements Initializable {
 
     }
 
-    private void populateSceneTree(Layer root) {
-
-    }
-
     private void updateSceneNode(final TreeItem<Layer> root) {
 
         // this handles automatically updating the scene tree

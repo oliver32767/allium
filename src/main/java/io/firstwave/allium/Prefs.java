@@ -1,5 +1,7 @@
 package io.firstwave.allium;
 
+import javafx.geometry.Rectangle2D;
+
 import java.io.File;
 import java.util.prefs.Preferences;
 
@@ -7,6 +9,19 @@ import java.util.prefs.Preferences;
  * Created by obartley on 11/30/15.
  */
 public class Prefs {
+
+    public static Rectangle2D getMainWindowDimensions() {
+        Preferences prefs = Preferences.userNodeForPackage(Allium.class);
+        return new Rectangle2D(0, 0,
+                prefs.getDouble("mainWindowWidth", 800),
+                prefs.getDouble("mainWindowHeight", 600));
+    }
+
+    public static void setMainWindowDimensions(double width, double height) {
+        Preferences prefs = Preferences.userNodeForPackage(Allium.class);
+        prefs.putDouble("mainWindowWidth", width);
+        prefs.putDouble("mainWindowHeight", height);
+    }
 
     public static boolean isDarkTheme() {
         Preferences prefs = Preferences.userNodeForPackage(Allium.class);
