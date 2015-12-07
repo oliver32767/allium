@@ -11,6 +11,7 @@ import io.firstwave.allium.utils.FXUtils;
 import io.firstwave.allium.viewer.ui.LayerNameTreeTableCell;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -30,9 +31,7 @@ import javafx.stage.Stage;
 import org.pmw.tinylog.Logger;
 
 import java.net.URL;
-import java.util.Objects;
-import java.util.Random;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Created by obartley on 11/30/15.
@@ -106,6 +105,8 @@ public class SceneViewerController implements Initializable {
     private Scene mScene;
     private Class<? extends Scene> mSceneType;
 
+    private List<Layer> mLayerOrder = new ArrayList<>();
+
     private double mScrollH, mScrollV;
 
     private final SimpleBooleanProperty mLocked = new SimpleBooleanProperty(false);
@@ -176,7 +177,11 @@ public class SceneViewerController implements Initializable {
             return rv;
         });
         sceneTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            updateOptionsList(newValue.getValue().getOptions());
+            if (newValue == null) {
+                updateOptionsList(null);
+            } else {
+                updateOptionsList(newValue.getValue().getOptions());
+            }
         });
     }
 
@@ -367,23 +372,41 @@ public class SceneViewerController implements Initializable {
         root.setExpanded(scene.getRoot().isExpanded());
         root.expandedProperty().bind(scene.getRoot().expandedProperty());
 
-        // TODO: we should probably add listeners to each node's child property and
-        // update the scene tree only when a modification is observed
+        mLayerOrder.clear();
+        mLayerOrder.add(scene.getRoot());
 
-        addSceneNode(root);
+        updateSceneNode(root);
 
     }
 
-    private void addSceneNode(TreeItem<Layer> root) {
+    private void populateSceneTree(Layer root) {
+
+    }
+
+    private void updateSceneNode(final TreeItem<Layer> root) {
+
+        // this handles automatically updating the scene tree
+        // when changes are observed in a layer's child list
+        final Layer layer = root.getValue();
+        layer.getChildNodes().addListener(new ListChangeListener<Layer>() {
+            @Override
+            public void onChanged(Change<? extends Layer> c) {
+                Logger.debug("scene tree changed");
+                layer.getChildNodes().removeListener(this);
+                root.getChildren().clear();
+                updateSceneNode(root);
+                sceneTree.getSelectionModel().clearSelection();
+            }
+        });
+
         for (Layer node : root.getValue().getChildNodes()) {
             final TreeItem<Layer> treeNode = new TreeItem<>(node);
             treeNode.setExpanded(node.isExpanded());
             treeNode.expandedProperty().bind(node.expandedProperty());
             root.getChildren().add(treeNode);
             Logger.debug("adding node:" + node.getName());
-            if (node.getChildCount() > 0) {
-                addSceneNode(treeNode);
-            }
+            mLayerOrder.add(node);
+            updateSceneNode(treeNode);
         }
     }
 
@@ -410,7 +433,7 @@ public class SceneViewerController implements Initializable {
         mScrollH = scrollPane.getHvalue();
         mScrollV = scrollPane.getVvalue();
 
-        layerStack.getChildren().clear();
+
 
         final RenderContext context = new RenderContext(seed,
                 (ctx, layer) -> {
@@ -430,17 +453,33 @@ public class SceneViewerController implements Initializable {
                 },
                 (ctx, source, message) -> setStatus("[" + source + "] " + message),
                 (ctx, source, tr) -> setStatus("[" + source + "] " + tr.toString()));
+
         progress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+        layerStack.getChildren().clear();
         mScene.render(context);
-        // TODO: this automatically resets the scene tree every time, so we need
-        // a better way of detecting changes to the layer tree
-        updateSceneTree(mScene);
     }
 
     private void publish(Layer layer, Canvas canvas) {
-        // TODO: ordering within the stack
-        Logger.debug("published:" + layer);
-        layerStack.getChildren().add(canvas);
+        final int index = mLayerOrder.indexOf(layer);
+        if (index < 0) {
+            Logger.warn("Unable to determine z-index of layer:" + layer);
+            return;
+        }
+
+        canvas.setUserData(index);
+
+        boolean added = false;
+        for (int i = 0; i < layerStack.getChildren().size(); i++) {
+            final int idx = (int) layerStack.getChildren().get(i).getUserData();
+            if (idx > index) {
+                layerStack.getChildren().add(i, canvas);
+                added = true;
+                break;
+            }
+        }
+        if (!added) {
+            layerStack.getChildren().add(canvas);
+        }
 
         if (mScrollV >= 0 || mScrollH >= 0) {
             scrollPane.setHvalue(mScrollH);

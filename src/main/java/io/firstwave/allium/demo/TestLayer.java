@@ -4,6 +4,7 @@ import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import org.pmw.tinylog.Logger;
 
 import java.util.Random;
 
@@ -17,7 +18,12 @@ public class TestLayer extends Layer {
         super.onPreRender(ctx);
         final int r = ctx.getRandom().nextInt(10);
         if (r > 8) {
+            Logger.warn("Adding new test layer");
             addChild(new TestLayer());
+        } else if (r > 6) {
+            if (getChildCount() > 0) {
+
+            }
         }
     }
 

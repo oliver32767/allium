@@ -138,6 +138,10 @@ public class Layer {
 
     // CHILD NODE API /////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Return a read only, observable list of children
+     * @return
+     */
     public final ObservableList<Layer> getChildNodes() {
         return FXCollections.unmodifiableObservableList(mChildNodes);
     }
@@ -214,7 +218,6 @@ public class Layer {
 
     /**
      * Main thread only
-     * @param child
      */
     public final void removeChild(Layer child) {
         mThreadEnforcer.enforce();
@@ -222,6 +225,14 @@ public class Layer {
         if (index >= 0) {
             removeChildInternal(index);
         }
+    }
+
+    /**
+     * Main thread only
+     */
+    public final void removeChildAt(int index) {
+        mThreadEnforcer.enforce();
+        removeChildInternal(index);
     }
 
     /**
@@ -324,7 +335,7 @@ public class Layer {
      */
     public final void render(RenderContext ctx) {
         ThreadEnforcer.BACKGROUND.enforce();
-        if (getState() != RenderState.READY) {
+        if (getState() != RenderState.READY || mRenderContext == null) {
             // already finished
             return;
         }
@@ -353,6 +364,7 @@ public class Layer {
         if (mCanvas != null) {
             mCanvas.visibleProperty().bind(visibleProperty());
             mRenderContext.publish(this);
+            mCanvas = null;
         }
 
         if (getState() != RenderState.ERROR) {
@@ -360,7 +372,6 @@ public class Layer {
         }
 
         mRenderContext = null;
-        mCanvas = null;
     }
 
 
