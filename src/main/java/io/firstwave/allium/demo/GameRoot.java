@@ -14,31 +14,16 @@ public class GameRoot extends Layer {
     @Inject
     NoiseLayer noise;
 
-    @Inject
-    FillLayer fill;
-
     public GameRoot() {
         Layer gl = new GridLayer();
         gl.setVisible(false);
         addChild(gl);
-        NoiseLayer nl = new NoiseLayer("noise");
-        addChild(nl);
-        addChild(new FillLayer("fill"));
-
-        Layer spam = new Layer("spam");
-
-        for (int i = 0; i < 5; i++) {
-            spam.addChild(new TestLayer());
-        }
-
-        addChild(spam);
-
+        addChild(new NoiseLayer("noise"));
     }
 
     @Override
     protected void onRender(RenderContext ctx) {
         super.onRender(ctx);
-        fill.render(ctx);
         noise.render(ctx);
     }
 }

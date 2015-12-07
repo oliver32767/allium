@@ -398,7 +398,7 @@ public class SceneViewerController implements Initializable {
         for (Layer node : root.getValue().getChildNodes()) {
             final TreeItem<Layer> treeNode = new TreeItem<>(node);
             treeNode.setExpanded(node.isExpanded());
-            treeNode.expandedProperty().bind(node.expandedProperty());
+            treeNode.expandedProperty().bindBidirectional(node.expandedProperty());
             root.getChildren().add(treeNode);
             Logger.debug("adding node:" + node.getName());
             mLayerOrder.add(node);

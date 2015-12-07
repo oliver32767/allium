@@ -40,9 +40,12 @@ public class NoiseLayer extends Layer {
 
     @Inject private Color positiveColor;
     @Inject private Color negativeColor;
-    @Inject private boolean signed;
+    @Inject private Color zeroesColor;
 
+    @Inject private boolean signed;
     @Inject private boolean flat;
+    @Inject private boolean zeroes;
+    @Inject private float zeroesWidth;
 
     private Function1<Long, Long> mSeedTransformer;
 
@@ -52,13 +55,15 @@ public class NoiseLayer extends Layer {
 
     public NoiseLayer(String name) {
         super(name);
+
         setOptions(Options.create()
+
                 .addSeparator("Noise")
                 .add("generator", new SingleChoiceOption("simplex", "simplex", "perlin"))
                 .add("octaves", new IntegerOption(1, 1, 32))
                 .add("frequency", new FloatOption(1))
                 .add("amplitude", new FloatOption(1))
-                .add("intensity", new FloatOption(1f, 0f, 1f))
+                .add("intensity", "Noise multiplier", new FloatOption(1f, 0f, 1f))
                 .add("normalized", "Normalize values to [-1..1]", new BooleanOption(false))
 
                 .addSeparator("Interpolation")
@@ -66,12 +71,18 @@ public class NoiseLayer extends Layer {
                 .add("noiseScale", new FloatOption(0.1f, 0.01f, 1f))
 
                 .addSeparator("Visualisation")
-                .add("thresholdMin", new FloatOption(-1.0f))
-                .add("thresholdMax", new FloatOption(1.0f))
-                .add("flat", new BooleanOption(false))
+                .add("thresholdMin", "Values below this threshold will not be rendered", new FloatOption(-1.0f))
+                .add("thresholdMax", "Values above this threshold will not be rendered", new FloatOption(1.0f))
+                .add("flat", "Apply no shading", new BooleanOption(false))
+                .add("signed", "If true, normalize all values to [0..1]", new BooleanOption(true))
+                .add("zeroes", "If true, render zeroes with a different color", new BooleanOption(false))
+                .add("zeroesWidth", "Values within +/- this range of 0.0 will be considered a zero", new FloatOption(0.005f, 0.001f, 0.01f))
+
+                .addSeparator()
                 .add("positiveColor", new ColorOption(Color.GREEN))
                 .add("negativeColor", new ColorOption(Color.RED))
-                .add("signed", new BooleanOption(true))
+                .add("zeroesColor", new ColorOption(Color.WHITE))
+
                 .build()
         );
     }
@@ -112,6 +123,7 @@ public class NoiseLayer extends Layer {
         float scaleY = (float) getScene().getHeight() * noiseScale;
 
         noise = getNoise((int) (getScene().getWidth() / scaleX), (int) (getScene().getHeight() / scaleY), mNoiseGenerator);
+
         interpolation = getInterpolation(noise, (int) getScene().getWidth(), (int) getScene().getHeight(),
                 Interpolator.CUBIC, Curve.lookup(interpolator), intensity);
 
@@ -150,6 +162,9 @@ public class NoiseLayer extends Layer {
                                 c.getOpacity() * d);
                     }
 
+                    if (zeroes && d > -zeroesWidth && d < zeroesWidth) {
+                        c = zeroesColor;
+                    }
                     pw.setColor(x, y, c);
                 }
 
