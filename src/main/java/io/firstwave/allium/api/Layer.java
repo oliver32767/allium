@@ -129,6 +129,9 @@ public class Layer {
     }
 
     protected void setMessage(String message) {
+        if (mRenderContext != null) {
+            mRenderContext.handleMessage(this, message);
+        }
         FXUtils.runOnMainThread(() -> mMessage.setValue(message));
     }
 

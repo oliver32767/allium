@@ -56,27 +56,24 @@ public class RiemannLayer extends Layer {
     protected void onRender(RenderContext ctx) {
         final double w = getScene().getWidth();
         final double h = getScene().getHeight();
-
-        ctx.handleMessage(this, "total area:" + w * h);
+        final double totalArea = w * h;
 
         // calculate the riemann-zeta sum using the value selected for c
         final double rzSum = Riemann.zeta(new double[] {c, 0})[0]; // we only want the real part
 
-        ctx.handleMessage(this, "riemann area:" + rzSum + " (c = " + c + ")");
-
         // now calculate the ratio between our riemann sum and the total area of the scene
-        final double rzRatio = (w * h) / rzSum;
-        ctx.handleMessage(this, "rz ratio: " + rzRatio);
+        final double rzRatio = (totalArea) / rzSum;
 
-        boolean halt = false;
-        boolean placed = false;
+        boolean placed;
 
         int iter = 1;
         long tests = 0;
 
         final List<Circle> mCircles = new ArrayList<>();
 
-        while (!halt) {
+        double accumulatedArea = 0;
+
+        while (true) {
             final double area = g(iter, c) * rzRatio;
 
             // A/π = r2
@@ -99,25 +96,31 @@ public class RiemannLayer extends Layer {
                 // we've placed a circle, exit the tolerance loop
                 if (placed) {
                     mCircles.add(new Circle(x, y, r));
+                    accumulatedArea += area;
                     break;
                 }
             }
 
             if (!placed) {
-                halt = true;
+                break;
             } else {
                 iter++;
                 if (iter > iterations) {
-                    halt = true;
+                    break;
                 }
             }
         }
 
+        final double efficiency = (accumulatedArea / totalArea) * 100;
         if (iter > iterations) {
-            setMessage("complete");
+            iter--;
+            setMessage(String.format("complete (%.4f%%)", efficiency));
         } else {
-            setMessage("failed @ " + iter);
+            setMessage(String.format("failed @ %d (%.4f%%)", iter, efficiency));
         }
+
+
+        ctx.handleMessage(this, String.format("finished %d iterations with %d tests (%.4f%% efficient)", iter, tests, efficiency));
 
         final GraphicsContext gc = getCanvas().getGraphicsContext2D();
 
