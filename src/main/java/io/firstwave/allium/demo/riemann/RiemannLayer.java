@@ -3,10 +3,7 @@ package io.firstwave.allium.demo.riemann;
 import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.inject.Inject;
-import io.firstwave.allium.api.options.ColorOption;
-import io.firstwave.allium.api.options.DoubleOption;
-import io.firstwave.allium.api.options.IntegerOption;
-import io.firstwave.allium.api.options.Options;
+import io.firstwave.allium.api.options.*;
 import io.firstwave.allium.gen.math.Riemann;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -35,6 +32,9 @@ public class RiemannLayer extends Layer {
     private Color strokeColor;
     @Inject
     private double minorOpacity;
+
+    // TODO: This is some weird state. Maybe we should pass this ratio between a0/a,n in directly to onRender?
+    private double r0;
 
     public RiemannLayer() {
         this(null);
@@ -80,7 +80,9 @@ public class RiemannLayer extends Layer {
             public void onRender(Circle shape, Canvas canvas) {
                 final double r = Math.sqrt(shape.area / Math.PI);
 
-                if (r > minorThreshold) {
+
+
+                if (r/r0 > minorThreshold) {
                     canvas.getGraphicsContext2D().setStroke(strokeColor);
                 } else {
                     final Color minorColor = new Color(strokeColor.getRed(),
@@ -181,10 +183,7 @@ public class RiemannLayer extends Layer {
 
         gc.setLineWidth(2);
 
-        final double r0 = Math.sqrt(g(1, c) * rzRatio / Math.PI);
-
-
-
+        r0 = Math.sqrt(g(1, c) * rzRatio / Math.PI);
         for (ShapeAdapter.Shape shape : mShapes) {
             mShapeAdapter.onRender(shape, getCanvas());
 
