@@ -8,6 +8,7 @@ import io.firstwave.allium.api.options.DoubleOption;
 import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.gen.math.Riemann;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -19,6 +20,8 @@ import java.util.Random;
  * Created by obartley on 12/7/15.
  */
 public class RiemannLayer extends Layer {
+
+    private ShapeAdapter mShapeAdapter;
 
     @Inject
     private double c;
@@ -52,6 +55,56 @@ public class RiemannLayer extends Layer {
                         new DoubleOption(0.25, 0, 1))
                 .build()
         );
+
+        setShapeAdapter(new ShapeAdapter<Circle>() {
+            @Override
+            public boolean isColliding(Circle shape, double x, double y, double area, int iteration) {
+                final double r = Math.sqrt(area / Math.PI);
+                final double r1 = Math.sqrt(shape.area / Math.PI);
+
+                final double minDist2 = r + r1;
+                final double dist2 =
+                        Math.sqrt(
+                                Math.pow((x - shape.x), 2) +
+                                        Math.pow((y - shape.y), 2));
+
+                return dist2 <= minDist2;
+            }
+
+            @Override
+            public Circle onCreateShape(double x, double y, double area, int iteration) {
+                return new Circle(x, y, area, iteration);
+            }
+
+            @Override
+            public void onRender(Circle shape, Canvas canvas) {
+                final double r = Math.sqrt(shape.area / Math.PI);
+
+                if (r > minorThreshold) {
+                    canvas.getGraphicsContext2D().setStroke(strokeColor);
+                } else {
+                    final Color minorColor = new Color(strokeColor.getRed(),
+                            strokeColor.getGreen(),
+                            strokeColor.getBlue(),
+                            minorOpacity);
+                    canvas.getGraphicsContext2D().setStroke(minorColor);
+                }
+
+                canvas.getGraphicsContext2D()
+                        .strokeOval(
+                                shape.x - r, shape.y - r, r * 2, r * 2);
+            }
+
+
+        });
+    }
+
+    public ShapeAdapter getShapeAdapter() {
+        return mShapeAdapter;
+    }
+
+    public void setShapeAdapter(ShapeAdapter shapeAdapter) {
+        mShapeAdapter = shapeAdapter;
     }
 
     @Override
@@ -71,7 +124,7 @@ public class RiemannLayer extends Layer {
         int iter = 1;
         long tests = 0;
 
-        final List<Circle> mCircles = new ArrayList<>();
+        final List<ShapeAdapter.Shape> mShapes = new ArrayList<>();
 
         double accumulatedArea = 0;
 
@@ -87,9 +140,9 @@ public class RiemannLayer extends Layer {
                 final double y = rand(ctx.getRandom(), r, h - r);
 
                 placed = true;
-                for (Circle circle : mCircles) {
+                for (ShapeAdapter.Shape shape : mShapes) {
                     tests++;
-                    if (circle.isCollision(x, y, r)) {
+                    if (mShapeAdapter.isColliding(shape, x, y, area, iter)) {
                         placed = false;
                         break;
                     }
@@ -97,7 +150,7 @@ public class RiemannLayer extends Layer {
 
                 // we've placed a circle, exit the tolerance loop
                 if (placed) {
-                    mCircles.add(new Circle(x, y, r));
+                    mShapes.add(mShapeAdapter.onCreateShape(x, y, area, iter));
                     accumulatedArea += area;
                     break;
                 }
@@ -130,22 +183,11 @@ public class RiemannLayer extends Layer {
 
         final double r0 = Math.sqrt(g(1, c) * rzRatio / Math.PI);
 
-        final Color minorColor = new Color(strokeColor.getRed(),
-                strokeColor.getGreen(),
-                strokeColor.getBlue(),
-                minorOpacity);
 
-        for (Circle circle : mCircles) {
 
-            final double r = circle.r / r0;
+        for (ShapeAdapter.Shape shape : mShapes) {
+            mShapeAdapter.onRender(shape, getCanvas());
 
-            if (r > minorThreshold) {
-                gc.setStroke(strokeColor);
-            } else {
-                gc.setStroke(minorColor);
-            }
-
-            gc.strokeOval(circle.x - circle.r, circle.y - circle.r, circle.r * 2, circle.r * 2);
         }
     }
 
@@ -158,26 +200,10 @@ public class RiemannLayer extends Layer {
     }
 
 
-    public static class Circle {
-        public final double x;
-        public final double y;
-        public final double r;
+    public static class Circle extends ShapeAdapter.Shape {
 
-        public Circle(double x, double y, double r) {
-            this.x = x;
-            this.y = y;
-            this.r = r;
-        }
-
-        public boolean isCollision(double x1, double y1, double r1) {
-
-            final double minDist2 = r + r1;
-            final double dist2 =
-                    Math.sqrt(
-                            Math.pow((x - x1), 2) +
-                                    Math.pow((y - y1), 2));
-
-            return dist2 <= minDist2;
+        private Circle(double x, double y, double area, int iteration) {
+            super(x, y, area, iteration);
         }
     }
 }
