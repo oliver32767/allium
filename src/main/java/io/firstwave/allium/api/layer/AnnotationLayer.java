@@ -54,6 +54,11 @@ public class AnnotationLayer extends Layer {
         mAnnotationList.clear();
     }
 
+    @Override
+    protected void onPreRender(RenderContext ctx) {
+        super.onPreRender(ctx);
+        mAnnotationList.clear();
+    }
 
     @Override
     protected void onRender(RenderContext ctx) {
