@@ -5,6 +5,7 @@ import io.firstwave.allium.api.RenderContext;
 import io.firstwave.allium.api.inject.Inject;
 import io.firstwave.allium.api.layer.GridLayer;
 import io.firstwave.allium.api.layer.NoiseLayer;
+import io.firstwave.allium.demo.riemann.RiemannLayer;
 
 /**
  * Created by obartley on 12/5/15.

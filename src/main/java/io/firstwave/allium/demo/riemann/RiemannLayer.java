@@ -1,4 +1,4 @@
-package io.firstwave.allium.demo;
+package io.firstwave.allium.demo.riemann;
 
 import io.firstwave.allium.api.Layer;
 import io.firstwave.allium.api.RenderContext;
@@ -27,11 +27,11 @@ public class RiemannLayer extends Layer {
     @Inject
     private int tolerance;
     @Inject
-    private double minArea;
+    private double minorThreshold;
     @Inject
-    private Color majorColor;
+    private Color strokeColor;
     @Inject
-    private Color minorColor;
+    private double minorOpacity;
 
     public RiemannLayer() {
         this(null);
@@ -44,10 +44,12 @@ public class RiemannLayer extends Layer {
                 .add("tolerance",
                         "If a shape cannot be placed randomly, placement will be retried this many times before halting iteration",
                         new IntegerOption(100, 0, 10000))
-                .add("minArea", new DoubleOption(0, 0, 1))
-                .addSeparator()
-                .add("majorColor", new ColorOption(Color.WHITE))
-                .add("minorColor", new ColorOption(new Color(1, 1, 1, 0.125)))
+
+                .addSeparator("Visualization")
+                .add("strokeColor", new ColorOption(Color.WHITE))
+                .add("minorThreshold", new DoubleOption(0.1, 0, 1))
+                .add("minorOpacity", "Opacity for shapes with areas where a,n/a,0 < minorThreshold",
+                        new DoubleOption(0.25, 0, 1))
                 .build()
         );
     }
@@ -59,7 +61,7 @@ public class RiemannLayer extends Layer {
         final double totalArea = w * h;
 
         // calculate the riemann-zeta sum using the value selected for c
-        final double rzSum = Riemann.zeta(new double[] {c, 0})[0]; // we only want the real part
+        final double rzSum = Riemann.zeta(new double[]{c, 0})[0]; // we only want the real part
 
         // now calculate the ratio between our riemann sum and the total area of the scene
         final double rzRatio = (totalArea) / rzSum;
@@ -128,12 +130,17 @@ public class RiemannLayer extends Layer {
 
         final double r0 = Math.sqrt(g(1, c) * rzRatio / Math.PI);
 
+        final Color minorColor = new Color(strokeColor.getRed(),
+                strokeColor.getGreen(),
+                strokeColor.getBlue(),
+                minorOpacity);
+
         for (Circle circle : mCircles) {
 
             final double r = circle.r / r0;
 
-            if (r > minArea) {
-                gc.setStroke(majorColor);
+            if (r > minorThreshold) {
+                gc.setStroke(strokeColor);
             } else {
                 gc.setStroke(minorColor);
             }
@@ -167,8 +174,8 @@ public class RiemannLayer extends Layer {
             final double minDist2 = r + r1;
             final double dist2 =
                     Math.sqrt(
-                        Math.pow((x - x1), 2) +
-                                Math.pow((y - y1), 2));
+                            Math.pow((x - x1), 2) +
+                                    Math.pow((y - y1), 2));
 
             return dist2 <= minDist2;
         }
