@@ -19,7 +19,7 @@ import java.util.Random;
 public class RiemannLayer extends Layer {
 
     private ShapeAdapter mShapeAdapter;
-
+    private final List<ShapeAdapter.Shape> mShapes = new ArrayList<>();
     @Inject
     private double c;
     @Inject
@@ -109,6 +109,10 @@ public class RiemannLayer extends Layer {
         mShapeAdapter = shapeAdapter;
     }
 
+    public List<ShapeAdapter.Shape> getShapes() {
+        return mShapes;
+    }
+
     @Override
     protected void onRender(RenderContext ctx) {
         final double w = getScene().getWidth();
@@ -126,7 +130,7 @@ public class RiemannLayer extends Layer {
         int iter = 1;
         long tests = 0;
 
-        final List<ShapeAdapter.Shape> mShapes = new ArrayList<>();
+        mShapes.clear();
 
         double accumulatedArea = 0;
 
