@@ -50,11 +50,23 @@ public class NoiseLayer extends Layer {
     private Function1<Long, Long> mSeedTransformer;
 
     public NoiseLayer() {
-        this(null);
+        this(null, null, null);
     }
 
     public NoiseLayer(String name) {
+        this(name, null, null);
+    }
+
+    public NoiseLayer(String name, Color positiveColor, Color negativeColor) {
         super(name);
+
+        if (positiveColor == null) {
+            positiveColor = Color.GREEN;
+        }
+
+        if (negativeColor == null) {
+            negativeColor = Color.RED;
+        }
 
         setOptions(Options.create()
 
@@ -76,17 +88,22 @@ public class NoiseLayer extends Layer {
                 .add("flat", "Apply no shading", new BooleanOption(false))
                 .add("signed", "If true, normalize all values to [0..1]", new BooleanOption(true))
                 .add("zeroes", "If true, render zeroes with a different color", new BooleanOption(false))
-                .add("zeroesWidth", "Values within +/- this range of 0.0 will be considered a zero", new FloatOption(0.005f, 0.001f, 0.01f))
+                .add("zeroesWidth", "Values within +/- this range of 0.0 will be considered a zero", new FloatOption(0.005f, 0f, 1f))
 
                 .addSeparator()
-                .add("positiveColor", new ColorOption(Color.GREEN))
-                .add("negativeColor", new ColorOption(Color.RED))
+                .add("positiveColor", new ColorOption(positiveColor))
+                .add("negativeColor", new ColorOption(negativeColor))
                 .add("zeroesColor", new ColorOption(Color.WHITE))
 
                 .build()
         );
     }
 
+    /**
+     * Set a function that will transform a given seed. Note that seed can == 0, so purely geometric transformations
+     * will not work very well (0 * n = 0)
+     * @param seedTransformer
+     */
     public void setSeedTransformer(Function1<Long, Long> seedTransformer) {
         mSeedTransformer = seedTransformer;
     }
@@ -112,6 +129,7 @@ public class NoiseLayer extends Layer {
                 seed = s;
             }
         }
+        setMessage("seed: " + seed);
 
         if ("simplex".equals(generator)) {
             mNoiseGenerator = new SimplexNoiseGenerator(seed);

@@ -1,7 +1,6 @@
 package io.firstwave.allium.api;
 
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import org.pmw.tinylog.Logger;
 
@@ -21,13 +20,12 @@ public final class RenderContext {
 
     private final IntegerProperty mLayerCount = new SimpleIntegerProperty(0);
     private final IntegerProperty mPublishCount = new SimpleIntegerProperty(0);
-    private final SimpleBooleanProperty mIsActive = new SimpleBooleanProperty(false);
 
     private Random mRandom;
 
     public RenderContext(long seed, Publisher publisher, MessageHandler messageHandler, ExceptionHandler exceptionHandler) {
-        this.seed = seed;
         mRandom = new Random(seed);
+        this.seed = seed;
         mPublisher = publisher;
         mMessageHandler = messageHandler;
         mExceptionHandler = exceptionHandler;
