@@ -17,9 +17,12 @@ public abstract class OptionBinder {
         registerBinder(Separator.class, new SeparatorBinder());
 
         registerBinder(BooleanOption.class, new CheckBoxBinder());
+
         final SliderBinder sb = new SliderBinder();
         registerBinder(IntegerOption.class, sb);
         registerBinder(FloatOption.class, sb);
+        registerBinder(DoubleOption.class, sb);
+
         registerBinder(ColorOption.class, new ColorPickerBinder());
         registerBinder(SingleChoiceOption.class, new ChoiceBoxBinder());
     }

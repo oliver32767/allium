@@ -11,7 +11,7 @@ public class DefaultBinder extends OptionBinder {
 
     @Override
     public Node bind(Option option) {
-        return new TextField("No binder for key: " + option.getKey() + " (type: " + option.getValueType() + ")");
+        return new TextField("No binder for key: " + option.getKey() + " (type: " + option.getClass() + ")");
     }
 
     @Override

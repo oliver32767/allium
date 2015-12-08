@@ -19,6 +19,7 @@ public class GameRoot extends Layer {
         gl.setVisible(false);
         addChild(gl);
         addChild(new NoiseLayer("noise"));
+        addChild(new RiemannLayer("riemann"));
     }
 
     @Override
