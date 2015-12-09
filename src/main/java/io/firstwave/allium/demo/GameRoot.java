@@ -7,6 +7,7 @@ import io.firstwave.allium.api.layer.AnnotationLayer;
 import io.firstwave.allium.api.layer.GridLayer;
 import io.firstwave.allium.api.layer.NoiseLayer;
 import io.firstwave.allium.api.options.DoubleOption;
+import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.demo.riemann.RiemannLayer;
 import javafx.scene.canvas.GraphicsContext;
@@ -30,13 +31,15 @@ public class GameRoot extends Layer {
     Layer sequence;
 
     @Inject
-    private double sequenceDecay;
+    private double edgeDecay;
 
-    private static final int T_MINUS = 5;
+    @Inject
+    private int annotationDepth;
 
     public GameRoot() {
         super(null, Options.create()
-                .add("sequenceDecay", new DoubleOption(0.95, 0, 1))
+                .add("edgeDecay", new DoubleOption(0.95, 0.75, 1))
+                .add("annotationDepth", new IntegerOption(100, 0, 1000))
                 .build()
         );
         Layer gl = new GridLayer();
@@ -64,9 +67,9 @@ public class GameRoot extends Layer {
         Color c = Color.PINK;
 
         double alpha;
-        final double decay = sequenceDecay;
+        final double decay = edgeDecay;
 
-        for (int i = 0; i < riemann.getShapes().size() && i < 100; i++) {
+        for (int i = 0; i < riemann.getShapes().size() && i < annotationDepth; i++) {
             final double newX = riemann.getShapes().get(i).x;
             final double newY = riemann.getShapes().get(i).y;
 
@@ -86,7 +89,7 @@ public class GameRoot extends Layer {
             y = newY;
 
 
-            anno.addAnnotation(new AnnotationLayer.Annotation(String.valueOf(i - T_MINUS),
+            anno.addAnnotation(new AnnotationLayer.Annotation(String.valueOf(i + 1),
                     riemann.getShapes().get(i).x,
                     riemann.getShapes().get(i).y));
         }
