@@ -9,8 +9,8 @@ import io.firstwave.allium.api.layer.NoiseLayer;
 import io.firstwave.allium.api.options.DoubleOption;
 import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
+import io.firstwave.allium.demo.riemann.CircleShapeAdapter;
 import io.firstwave.allium.demo.riemann.RiemannLayer;
-import io.firstwave.allium.demo.riemann.SquareShapeAdapter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -50,9 +50,8 @@ public class GameRoot extends Layer {
         nl.setSeedTransformer(param -> (param + 1) * 2);
         addChild(nl);
         addChild(new NoiseLayer("noise"));
-        riemann = new RiemannLayer("riemann", SquareShapeAdapter.getOptions());
-//        riemann.setShapeAdapter(new CircleShapeAdapter());
-        riemann.setShapeAdapter(new SquareShapeAdapter());
+        riemann = new RiemannLayer("riemann", CircleShapeAdapter.getOptions());
+        riemann.setShapeAdapter(new CircleShapeAdapter());
         addChild(riemann);
         addChild(new AnnotationLayer("anno"));
         addChild(new Layer("sequence"));

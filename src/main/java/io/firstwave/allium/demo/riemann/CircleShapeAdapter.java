@@ -34,15 +34,8 @@ public class CircleShapeAdapter extends ShapeAdapter<CircleShapeAdapter.Circle> 
     }
 
     @Override
-    public boolean isColliding(RiemannLayer layer, Circle shape1, Circle shape2) {
-
-        final double minDist = shape1.r + shape2.r;
-        final double dist =
-                Math.sqrt(
-                        Math.pow((shape1.x - shape2.x), 2) +
-                                Math.pow((shape1.y - shape2.y), 2));
-
-        return dist <= minDist;
+    public boolean isOverlapping(RiemannLayer layer, Circle shape1, Circle shape2) {
+        return shape1.isOverlapping(shape2);
     }
 
     @Override
@@ -87,6 +80,29 @@ public class CircleShapeAdapter extends ShapeAdapter<CircleShapeAdapter.Circle> 
         public Circle(double x, double y, double area, int iteration) {
             super(x, y, area, iteration);
             r = Math.sqrt(area / Math.PI);
+        }
+
+        public boolean isOverlapping(Circle circle) {
+            final double minDist = r + circle.r;
+            final double dist =
+                    Math.sqrt(
+                            Math.pow((x - circle.x), 2) +
+                                    Math.pow((y - circle.y), 2));
+
+            return dist < minDist;
+        }
+
+        public boolean contains(double x1, double y1) {
+            final double dist =
+                    Math.sqrt(
+                            Math.pow((x - x1), 2) +
+                                    Math.pow((y - y1), 2));
+            return dist < r;
+        }
+
+        public boolean intersects(double x1, double y1, double x2, double y2) {
+            // TODO
+            return false;
         }
     }
 }

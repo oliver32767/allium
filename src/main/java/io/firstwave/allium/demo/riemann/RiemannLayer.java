@@ -105,7 +105,7 @@ public class RiemannLayer extends Layer {
                 placed = true;
                 for (ShapeAdapter.Shape shape : mShapes) {
                     tests++;
-                    if (mShapeAdapter.isColliding(this, shape, test)) {
+                    if (mShapeAdapter.isOverlapping(this, shape, test)) {
                         placed = false;
                         break;
                     }

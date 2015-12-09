@@ -33,18 +33,11 @@ public class SquareShapeAdapter extends ShapeAdapter<SquareShapeAdapter.Square> 
     }
 
     @Override
-    public boolean isColliding(RiemannLayer layer, Square shape1, Square shape2) {
-
-
-        return isColliding(shape1, shape2.left, shape2.top) ||
-                isColliding(shape1, shape2.right, shape2.top) ||
-                isColliding(shape1, shape2.right, shape2.bottom) ||
-                isColliding(shape1, shape2.left, shape2.bottom);
+    public boolean isOverlapping(RiemannLayer layer, Square shape1, Square shape2) {
+        return shape1.isOverlapping(shape2);
     }
 
-    private boolean isColliding(Square square, double x, double y) {
-        return (x > square.left && x < square.right && y > square.top && y < square.bottom);
-    }
+
 
     @Override
     public Square onCreateShape(RiemannLayer layer, double x, double y, double area, int iteration) {
@@ -92,6 +85,17 @@ public class SquareShapeAdapter extends ShapeAdapter<SquareShapeAdapter.Square> 
             top = y - edge / 2;
             right = x + edge / 2;
             bottom = y + edge / 2;
+        }
+
+        public boolean isOverlapping(Square square) {
+            return contains(square.left, square.top) ||
+                    contains(square.right, square.top) ||
+                    contains(square.right, square.bottom) ||
+                    contains(square.left, square.bottom);
+        }
+
+        public boolean contains(double x1, double y1) {
+            return (x1 > left && x1 < right && y1 > top && y1 < bottom);
         }
     }
 }
