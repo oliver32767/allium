@@ -34,17 +34,15 @@ public class CircleShapeAdapter extends ShapeAdapter<CircleShapeAdapter.Circle> 
     }
 
     @Override
-    public boolean isColliding(RiemannLayer layer, Circle shape, double x, double y, double area, int iteration) {
-        final double r = Math.sqrt(area / Math.PI);
-        final double r1 = Math.sqrt(shape.area / Math.PI);
+    public boolean isColliding(RiemannLayer layer, Circle shape1, Circle shape2) {
 
-        final double minDist2 = r + r1;
-        final double dist2 =
+        final double minDist = shape1.r + shape2.r;
+        final double dist =
                 Math.sqrt(
-                        Math.pow((x - shape.x), 2) +
-                                Math.pow((y - shape.y), 2));
+                        Math.pow((shape1.x - shape2.x), 2) +
+                                Math.pow((shape1.y - shape2.y), 2));
 
-        return dist2 <= minDist2;
+        return dist <= minDist;
     }
 
     @Override

@@ -5,7 +5,7 @@ package io.firstwave.allium.demo.riemann;
  */
 public abstract class ShapeAdapter<S extends ShapeAdapter.Shape> {
 
-    public abstract boolean isColliding(RiemannLayer layer, S shape, double x, double y, double area, int iteration);
+    public abstract boolean isColliding(RiemannLayer layer, S shape1, S shape2);
 
     public abstract S onCreateShape(RiemannLayer layer, double x, double y, double area, int iteration);
 

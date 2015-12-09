@@ -100,10 +100,12 @@ public class RiemannLayer extends Layer {
                 final double x = rand(ctx.getRandom(), r, w - r);
                 final double y = rand(ctx.getRandom(), r, h - r);
 
+                final ShapeAdapter.Shape test = adapter.onCreateShape(this, x, y, area, iter);
+
                 placed = true;
                 for (ShapeAdapter.Shape shape : mShapes) {
                     tests++;
-                    if (mShapeAdapter.isColliding(this, shape, x, y, area, iter)) {
+                    if (mShapeAdapter.isColliding(this, shape, test)) {
                         placed = false;
                         break;
                     }

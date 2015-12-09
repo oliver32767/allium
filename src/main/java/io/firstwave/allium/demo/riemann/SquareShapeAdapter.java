@@ -33,17 +33,13 @@ public class SquareShapeAdapter extends ShapeAdapter<SquareShapeAdapter.Square> 
     }
 
     @Override
-    public boolean isColliding(RiemannLayer layer, Square shape, double x, double y, double area, int iteration) {
-        final double edge = Math.sqrt(area);
-        final double left = x - edge / 2;
-        final double top = y - edge / 2;
-        final double right = x + edge / 2;
-        final double bottom = y + edge / 2;
+    public boolean isColliding(RiemannLayer layer, Square shape1, Square shape2) {
 
-        return isColliding(shape, left, top) ||
-                isColliding(shape, right, top) ||
-                isColliding(shape, right, bottom) ||
-                isColliding(shape, left, bottom);
+
+        return isColliding(shape1, shape2.left, shape2.top) ||
+                isColliding(shape1, shape2.right, shape2.top) ||
+                isColliding(shape1, shape2.right, shape2.bottom) ||
+                isColliding(shape1, shape2.left, shape2.bottom);
     }
 
     private boolean isColliding(Square square, double x, double y) {
