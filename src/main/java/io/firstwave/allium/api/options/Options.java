@@ -31,6 +31,9 @@ public final class Options {
     }
 
     public static Builder buildUpon(Options options) {
+        if (options == null) {
+            return new Builder();
+        }
         return new Builder(options);
     }
 
@@ -255,6 +258,9 @@ public final class Options {
         public Builder(Options copy) {
             mItems = new LinkedHashMap<>(copy.mItems);
             mValues = new HashMap<>(copy.mValues);
+            if (mItems.size() > 0) {
+                addSeparator();
+            }
         }
 
         public Builder add(String key, Option item) {
