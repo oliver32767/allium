@@ -1,17 +1,15 @@
 package io.firstwave.allium.demo.riemann;
 
-import javafx.scene.canvas.Canvas;
-
 /**
  * Created by obartley on 12/8/15.
  */
 public abstract class ShapeAdapter<S extends ShapeAdapter.Shape> {
 
-    public abstract boolean isColliding(S shape, double x, double y, double area, int iteration);
+    public abstract boolean isColliding(RiemannLayer layer, S shape, double x, double y, double area, int iteration);
 
-    public abstract S onCreateShape(double x, double y, double area, int iteration);
+    public abstract S onCreateShape(RiemannLayer layer, double x, double y, double area, int iteration);
 
-    public abstract void onRender(S shape, Canvas canvas);
+    public abstract void onRender(RiemannLayer layer, S shape);
 
 
     public static class Shape {
