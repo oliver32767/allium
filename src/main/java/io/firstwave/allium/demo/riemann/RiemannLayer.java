@@ -8,7 +8,6 @@ import io.firstwave.allium.api.options.IntegerOption;
 import io.firstwave.allium.api.options.Options;
 import io.firstwave.allium.gen.math.Riemann;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +27,6 @@ public class RiemannLayer extends Layer {
     private int iterations;
     @Inject
     private int tolerance;
-    @Inject
-    private double minorThreshold;
-    @Inject
-    private Color strokeColor;
-    @Inject
-    private double minorOpacity;
 
     public RiemannLayer() {
         this(null);
@@ -50,12 +43,6 @@ public class RiemannLayer extends Layer {
                 .add("tolerance",
                         "If a shape cannot be placed randomly, placement will be retried this many times before halting iteration",
                         new IntegerOption(100, 0, 10000))
-
-                .addSeparator("Visualization")
-
-                .add("minorThreshold", new DoubleOption(0.1, 0, 1))
-                .add("minorOpacity", "Opacity for shapes with areas where a,n/a,0 < minorThreshold",
-                        new DoubleOption(0.25, 0, 1))
                 .build()
         );
     }
