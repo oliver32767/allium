@@ -359,6 +359,7 @@ public class SceneViewerController implements Initializable {
         }
 
         final TreeItem<Layer> root = new TreeItem<>(scene.getRoot());
+        bindSceneNode(root);
 
         sceneTree.setRoot(root);
 
@@ -368,9 +369,6 @@ public class SceneViewerController implements Initializable {
                 updateOptionsList(sel.getOptions());
             }
         }
-
-        root.setExpanded(scene.getRoot().isExpanded());
-        root.expandedProperty().bind(scene.getRoot().expandedProperty());
 
         mLayerOrder.clear();
         mLayerOrder.add(scene.getRoot());
@@ -397,13 +395,17 @@ public class SceneViewerController implements Initializable {
 
         for (Layer node : root.getValue().getChildNodes()) {
             final TreeItem<Layer> treeNode = new TreeItem<>(node);
-            treeNode.setExpanded(node.isExpanded());
-            treeNode.expandedProperty().bindBidirectional(node.expandedProperty());
+            bindSceneNode(treeNode);
             root.getChildren().add(treeNode);
             Logger.debug("adding node:" + node.getName());
             mLayerOrder.add(node);
             updateSceneNode(treeNode);
         }
+    }
+
+    private void bindSceneNode(TreeItem<Layer> node) {
+        node.setExpanded(node.getValue().isExpanded());
+        node.expandedProperty().bindBidirectional(node.getValue().expandedProperty());
     }
 
     private void render() {
