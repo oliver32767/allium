@@ -61,13 +61,13 @@ public class CircleShapeAdapter extends ShapeAdapter<CircleShapeAdapter.Circle> 
                 strokeColor.getRed(),
                 strokeColor.getGreen(),
                 strokeColor.getBlue(),
-                alpha));
+                strokeColor.getOpacity() * alpha));
 
         gc.setFill(new Color(
                 fillColor.getRed(),
                 fillColor.getGreen(),
                 fillColor.getBlue(),
-                alpha
+                fillColor.getOpacity() * alpha
         ));
 
         gc.fillOval(shape.x - shape.r, shape.y - shape.r, shape.r * 2, shape.r * 2);
